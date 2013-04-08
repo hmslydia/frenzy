@@ -62,7 +62,8 @@ allData["users"] = {
 //require('./datasets/photoAlbum_0-9')
 //require('./datasets/twitterFollowers')
 
-/*Frenzy Datasets*/
+
+/*Frenzy Datasets*/
 //require('./datasets/twitterFollowers2')
 require('./datasets/photoAlbum_10-19')
 
@@ -80,13 +81,6 @@ app.get('/utils.js', function(request, response){
     response.sendfile('utils.js')
 });
 
-
-/*
-require('./saveAndDisplayJokes');
-app.get("/saveAndDisplayJokes.js", function(require, response) {
-    response.sendfile("saveAndDisplayJokes.js")
-})
-*/
 require('./textSearch');
 app.get("/textSearch.js", function(require, response) {
     response.sendfile("textSearch.js")
