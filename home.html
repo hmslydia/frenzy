@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Twitify</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->   
+    <link href="http://abstract.cs.washington.edu/~hmslydia/utils/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 40px;
+        padding-bottom: 40px;
+      }
+    </style>
+    <link href="http://abstract.cs.washington.edu/~hmslydia/utils/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+
+<script type = "text/javascript" src="http://abstract.cs.washington.edu/~hmslydia/coda/helpers/jquery.js"></script>
+<script type = "text/javascript" src="http://abstract.cs.washington.edu/~hmslydia/coda/helpers/utils.js"></script>
+<script type = "text/javascript" src="http://abstract.cs.washington.edu/~hmslydia/coda/helpers/json2.js"></script>
+
+<script type = "text/javascript" src="utils.js"></script>
+<script type = "text/javascript" src="textSearch.js"></script>
+<script type = "text/javascript" src="twitterFeed.js"></script>
+<script type = "text/javascript" src="hashtagSummary.js"></script>
+<script type = "text/javascript" src="editTweets.js"></script>
+
+<style type="text/css">
+
+body {
+	background-image: url('http://homes.cs.washington.edu/~felicia0/images/twitify/spring.jpg');
+	background-repeat:no-repeat;
+	background-attachment: fixed;
+	background-size: 100%;
+	background-size: cover;
+	width:100%;
+	margin:0 auto;
+	min-height: 100%;
+	min-width: 1000px;
+	overflow: visible;
+
+}
+
+#container{
+    background: rgba(105, 105, 105, 0.5);
+    
+}
+
+label{
+	color:white; 
+}
+ 
+.basetweet{
+    padding:5px;
+    margin: 5px;
+    background-color: white;
+    border-radius: 6px;
+}
+
+.tweet{
+    padding:5px;
+    margin: 5px;
+    background-color: white;
+    opacity: 1.0;
+   
+}
+.replyTextArea{
+	/*width: 390px;*/
+	width:93%;
+	height: 70px;
+	margin-left: 10px;
+	margin-top: 10px;
+}
+.replyTextDiv{
+	margin-top:15px;
+	border-top-style:solid;
+	border-top-color:blue;
+	border-top-width: 1px;
+	
+	border: 1px solid blue;
+	padding-bottom: 5px;
+}
+
+.subReplyTextArea{
+	border: 1px solid blue;
+	padding-bottom: 20px;
+	margin-bottom: 8px;
+}
+
+.discussionFeed{
+	margin-top: 5px;
+	margin-bottom: 10px;
+}
+
+.replyButton{
+	margin-left: 10px;
+}
+
+.hashtag{
+    color: blue;
+    cursor: pointer;
+}
+.userNameSpan{
+	color:green;
+	font-size: medium;
+}
+.user{
+    color: blue;
+    cursor: pointer;
+    font-face: bold;
+}
+#logo_img{
+	display: inline-block;
+	float:left;
+}
+#home_img{
+	display: inline-block;
+	float: left;
+}
+#discussionDiv{
+	position: relative;
+}
+
+#hashtagSummaryContainer{
+    padding:5px;
+    margin: 5px;
+    background-color: white;
+    border-radius: 6px;
+}
+/*
+#completenessEvaluation{
+	padding-top: 5px;
+    background-color: white;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+#feedDiv{
+	padding-top: 5px;
+    background-color: white;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}*/
+#composeTweetContainer{
+    padding:5px;
+    margin: 5px;
+    
+    background-color: white;
+    border-radius: 6px;
+}
+
+.highlight{
+    font-face: bold;
+}
+.sidebar-nav-fixed {
+     position:fixed;
+}
+
+#newTweetCounter{
+	border:2px solid;
+	border-radius:25px;
+	box-shadow: 10px 10px 5px #888888;
+	text-align: center;
+	display:block;
+	color: blue;
+    cursor: pointer;
+    font-face: bold; 
+    background-color: red;
+}
+#newTweetCounterTop{
+	border:2px solid;
+	border-radius:25px;
+	text-align: center;
+	color: black;
+    cursor: pointer;
+    font-face: bold; 
+    background-color: grey;
+    width: 100%;
+}
+
+.homeButton{
+	clear:both;
+	left:-40px;
+}
+.homeImage { 
+   position: relative; 
+   width: 100%; /* for IE 6 */
+}
+
+.paddingTop{
+	padding-top: 20px;
+}
+
+h2 { 
+   position: absolute; 
+   top: -12px; 
+   left: 40px; 
+   width: 100%; 
+   font-size:medium;
+   font-style: bold;
+}
+</style>
+
+
+
+<script type="text/javascript">
+
+var twitterFeed = []
+
+function getUserName(){
+	return $("#username").val()
+}
+
+function ajax(command, result, cb) {    
+    console.log("ajax command: "+command);
+    //console.log(result)
+	result["username"] = getUserName()
+	$.post(document.location.href, { "command" : command, args : JSON.stringify(result) }, cb)
+}
+
+function signIn(){
+
+	username=getUserName();
+	console.log("signin")
+	if($("#signInOut").val() == "Sign In" && username!=""){
+	
+		$("#signInOut").val("Sign Out")
+		
+		//document.getElementById('username').readOnly=true;
+		
+		displayComposeTweet(username)
+		
+		ajax("SignIn",{"username":username},function(returnData) {
+		});
+		
+		$("#username").hide();
+		$("#signInOut").hide();
+	}
+}
+function signOut(){
+		$("#signInOut").val("Sign In")
+		$("#composeTweet").empty();
+		$("#username").show();
+		$("#signInOut").show();
+}
+
+function goToHome(){
+	twitterFeedSetup();
+	$("#homeButton").attr('src','http://homes.cs.washington.edu/~felicia0/images/twitify/homebutton.png');
+	$("#counter").text("");
+}
+
+$(document).ready(function(){
+    conditionsSetup()
+    twitterFeedSetup()
+	textSearchSetup()
+    
+    $("#saveDiscussion").click(function() {
+		storeOldData();  
+		fetchNewJokeForFeed()
+	})
+    
+    $("#signInOut").click(function(){
+        signIn()
+    })
+    $("#username").keypress(function(event) {
+        if( event.which == 13 ) {
+            signIn()
+       }
+    })
+    
+})
+
+function getCompletionConditionHashtags(){
+    var requirementString = $("#requirements").val()
+    //console.log("requirementString "+ requirementString);
+    return requirementString;
+}
+
+//var int=self.setInterval(function(){checkForUpdates()},5000);
+function checkForUpdates(){
+	ajax("getUpdates",{"completionConditionHashtags": getCompletionConditionHashtags()}, function(returnData) {
+		var count = JSON.parse(returnData)["newTweetCount"]
+		updateNewTweetCount(count);
+        
+        var completionDataObjects = JSON.parse(returnData)["completionDataObjects"]
+		displayCompletionData(completionDataObjects)
+        
+        }
+    )
+}
+
+function displayCompletionData(completionDataObjects){
+	var matchingBaseTweetObjects = completionDataObjects["matchingBaseTweetObjects"]
+	var nonMatchingBaseTweetObjects = completionDataObjects["nonMatchingBaseTweetObjects"]
+	//console.log("")
+	//console.log(matchingBaseTweetObjects)
+	//console.log(nonMatchingBaseTweetObjects)
+	
+	
+	
+	displayConditionsUpdate(matchingBaseTweetObjects, nonMatchingBaseTweetObjects)
+}
+
+function updateNewTweetCount(count){
+	if(count>0){
+		$("#countPlaceholder").empty();
+		
+		leftCounterDiv = $("<div id='newTweetCounter'>");
+		leftCounterDiv.text(count);
+		
+		
+		leftCounterDiv.click(function(){
+			goToHome();
+			$("#countPlaceholder").empty();
+		});
+
+		//$("#countPlaceholder").append(leftCounterDiv);
+		
+		$("#homeButton").attr('src','http://homes.cs.washington.edu/~felicia0/images/twitify/homebuttonNewMessages5.png');
+		$("#counter").text(count);
+	}
+}
+
+
+function outputHierarchy(outputButton){
+	ajax("getTwitterFeed", {}, function(returnData) {
+		createOutput(JSON.parse(returnData)["hashtagSummary"],JSON.parse(returnData)["twitterFeed"])
+	});
+}
+
+
+
+function createOutput (hashtagSummary,twitterFeed) {
+
+	var test = "#cow: always gives milk/";
+	
+	var testRE = test.match("#cow:(.*)/");
+	console.log("COOOOOOOOOOOOW")
+	console.log(testRE[1]);
+
+
+
+  var userName = getUserName()
+  var newPage = "<html><head><title>"
+  newPage += userName;
+  newPage += "</title></head><body>";
+  newPage += "<p>Output " + userName;
+  newPage += "</p></body></html>";
+
+  newPage+=outputHashtagSummary(hashtagSummary,twitterFeed)
+  
+  var j = window.open();
+  j.document.write(newPage);
+  //j.document.close();
+}
+
+
+function outputHashtagSummary(hashtagSummary,twitterFeed){
+	var tweetIdsWithHashTags=[]
+   	var baseTweets = filterArray(twitterFeed, function(tweetObj){ return tweetObj["basetweet"]["parent"]=="none" })
+   	var baseTweetIds = map(baseTweets, function(x){return x["basetweet"]["id"]})
+
+    var newPageDiv=$("<div id='newPageDiv'>")
+    
+    answer = []
+    var allHashtags = []
+    for( i in hashtagSummary){
+        var hashtagObject = hashtagSummary[i]
+        allHashtags.push({"hashtag":hashtagObject, "parents":[]} )
+    }
+    orderAndEnchild(allHashtags, allHashtags)
+
+    for(i in answer){
+        var hashtagSummaryItem = answer[i]
+        var hashtag = hashtagSummaryItem["hashtag"]["hashtag"]
+        var memberTweetIds = hashtagSummaryItem["hashtag"]["memberTweetIds"]
+        var indents = hashtagSummaryItem["parents"].length
+        var counts = hashtagSummaryItem["hashtag"]["counts"]
+        
+        tweetIdsWithHashTags.push.apply(tweetIdsWithHashTags,memberTweetIds)
+        console.log(tweetIdsWithHashTags);
+        var ul=$("<ul>")
+        ul.css('list-style-type','none');
+        hashtagDiv = createHashtagli(hashtag, counts)
+
+        var images = getImagesInHashtagAsHtml(hashtag,indents,hashtagSummary,twitterFeed,hashtagDiv);
+        ul.append(images)
+        
+        newPageDiv.append(ul);
+    }  
+    
+    //remove duplicates
+    tweetIdsWithHashTags=tweetIdsWithHashTags.filter(function(item, index) {
+            return tweetIdsWithHashTags.indexOf(item) == index;
+    });
+    
+    var uncategorizedTweetIds = baseTweetIds.filter(function(i) {return !(tweetIdsWithHashTags.indexOf(i) > -1);});
+    console.log("uncategorizedTweetIds")
+    console.log(uncategorizedTweetIds);
+       
+    var ul=$("<ul>")
+    var li =$("<li>")
+    li.text("Uncategorized");
+    ul.append(li);
+    ul.css('list-style-type','none');
+    ul.css('margin-left',"30px")
+    for(uncat in uncategorizedTweetIds){
+	    tweetId = uncategorizedTweetIds[uncat]
+	    console.log(tweetId)
+	    var imageHtml=$("<li>");
+	    var html = filterArray(twitterFeed, function(x){return x["basetweet"]["id"]==tweetId})[0]["basetweet"]["html"]
+	    console.log(html)
+	    imageHtml.css('width',"200px")
+	    imageHtml.css('display','inline-block')
+        imageHtml.append(html)
+        ul.append(imageHtml);
+    }
+    newPageDiv.append(ul);
+    console.log(ul);
+   return newPageDiv.html();
+}
+
+
+function getImagesInHashtagAsHtml(hashtag,indent, hashtagSummary,twitterFeed,hashtagDiv){
+	var imageHtml=$("<li>");
+	var tweetIds = getListOfTweetIdsForHashtag(hashtagSummary,hashtag);
+	var filteredTweets = filterArray(twitterFeed, function(x){ return tweetIds.indexOf(x["basetweet"]["id"])>-1})
+	console.log(filteredTweets)
+	
+	var imagesDivUL=$("<ul>")
+	imagesDivUL.css('list-style-type','none');
+	imagesDivUL.css('margin-left',indent*30+"px")
+	imagesDivUL.append(hashtagDiv);
+	for(t in filteredTweets){
+		var tweet = filteredTweets[t]
+		var tweetHtml = tweet["basetweet"]["html"]
+		
+		var imagesDiv=$("<li>")
+		imagesDiv.css('margin-left',indent*30+"px")
+		imagesDiv.css('display','inline-block')
+		imagesDiv.css('width',"200px")
+        imagesDiv.append(tweetHtml);
+        
+        imagesDivUL.append(imagesDiv)
+	}
+	imageHtml.append(imagesDivUL);
+	return imageHtml
+}
+
+function getListOfTweetIdsForHashtag(allHashTags,hashtag){
+	var filteredArray= filterArray(allHashTags, function(x){ return (x["hashtag"])==hashtag})
+	var tweetIds = map(filteredArray, function(x){return x["memberTweetIds"]})
+	return tweetIds[0]
+}
+
+
+function getListOfHashTagsForBaseTweet(baseTweetId,allHashTags){
+	var hts = getHashtagSummaryForBaseTweet(baseTweetId,allHashTags)
+	var hashTags = map(hts, function(x){return x["hashtag"]})
+	return hashTags
+}
+
+function getHashtagSummaryForBaseTweet(baseTweetId,allHashTags){
+	//{"hashtag": hashtag, "counts":counts, "memberTweetIds": baseTweets}
+	console.log(allHashTags);
+	var filteredArray= filterArray(allHashTags, function(x){ console.log(x["memberTweetIds"]); return (x["memberTweetIds"]).indexOf(baseTweetId)>-1})
+    return filteredArray;
+    
+}
+
+
+
+function createHashtagli(hashtag, counts){
+    div= $("<li>")
+    div.text(hashtag + " ("+counts+") ")
+    return div
+}
+
+</script>
+</head>
+
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="active">
+              <div class="homeImage"><a href="#" onclick="goToHome()"><h2 id="counter"></h2><img class="homeButton" id='homeButton' src="http://homes.cs.washington.edu/~felicia0/images/twitify/homebutton.png"></a></div>
+              </li>
+            </ul>
+            <form class="navbar-form pull-right" id="navBarForm">
+                <input type="text" id="username" placeholder="username" >
+                <input type="button" class="btn" id="signInOut" value= "Sign In" />
+              
+                <input class="span2" type="text" placeholder="search" id="search">
+                <!-<input type="button" class="btn" id="searchSubmit" value= "Search" />
+              
+                <select class="span2" id="sortBy">
+                    <option value="default">(default)</option>
+                    <option value="mostDiscussed">most discussed</option>
+                    <option value="mostDiscussedByMe">most discussed by me</option>
+                    <option value="leastDiscussed">least discussed</option>
+                    <option value="leastDiscussedByMe">least discussed by me</option>
+                    <option value="original">(original order)</option>
+                </select>
+                
+              <!-- <input class="span2" type="text" placeholder="search" id="sortBy"> -->
+              <input type="button" class="btn" id="sortSubmit" value= "Search" />
+            </form>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+    
+<div id="container" class="container">
+    <div class="row">
+        <div class="span2" >
+            <div class= "sidebar-nav-fixed">
+                <div class="row">
+                    <div class="span2" >
+                       <div id ="composeTweetContainer" style="width:100%" >
+                            <div class="column" id="composeTweet">
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                   <div class="span2" >
+                        <div id ="hashtagSummaryContainer" style="width:100%">
+                            <div class="column" id="hashtagSummary">
+                            
+                            </div>
+                            <!-<input type="button" class="btn" id="outputButton" value= "Output" onclick="outputHierarchy(this)" />
+                       </div>
+                   
+                    </div>       
+                </div>
+            </div>
+        </div>
+        <div class="span10" >
+                <div class="right-side-container" >
+                
+                    
+                    <div class="row">
+                        <div style="position:fixed">
+                            <div class="span10" >
+                                <div style="background-color: #009933;  width:93%; margin-right:100px">
+                                	<div id="completenessEvaluation">
+                                	</div>
+                                </div>
+                             </div>
+                                 
+                        </div>
+                    </div>
+                    <div class="row">
+                
+                        <div>
+                            <div class="span10">
+                                <div id ="feedDiv">
+                                    <div class="span10" id="twitterFeed">
+                                    </div>
+                                </div>        
+                            </div>
+                        </div>  
+                            
+                    <div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>    
+    
+<!--
+<div id="container" class="container">
+    <div class="row">
+        <div class="span2" >
+            <div class= "sidebar-nav-fixed">
+                <div class="row">
+                    <div class="span2" >
+                       <div id ="composeTweetContainer" style="width:100%" >
+                            <div class="column" id="composeTweet">
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                   <div class="span2" >
+                        <div id ="hashtagSummaryContainer" style="width:100%">
+                            <div class="column" id="hashtagSummary">
+                            
+                            </div>
+                            <input type="button" class="btn" id="outputButton" value= "Output" onclick="outputHierarchy(this)" />
+                       </div>
+                   
+            </div>       
+                    </div>
+                </div>
+        </div>
+        <div class="row">
+        	<div class="span10">
+		        <div class="row">
+		            <div class="span10">
+			             <div class="sidebar-nav-fixed" id="completenessEvaluation">
+			             </div>
+		        	</div>
+		        </div>
+		        <div class="row">
+			        <div class="span10">
+			            <div id ="feedDiv">
+			                <div class="span10" id="twitterFeed">
+			                </div>
+			            </div>        
+			        </div>
+		        </div>
+        	</div>
+        </div>
+    
+    </div>
+</div>
+-->
+</body>
+</html>
