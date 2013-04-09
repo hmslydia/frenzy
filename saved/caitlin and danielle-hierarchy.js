@@ -1,5 +1,14 @@
-{
-  "tweets": {
+completionCondition=[
+	{
+	"number1":"all",
+	"attribute1":"discussion",
+	"number2":"2",
+	"attribute2":"hashtags"
+	}
+] 
+requiredHashtags=["#"]
+
+tweets={
     "nature20": {
       "time": 20,
       "html": "<img src='http://abstract.cs.washington.edu/~hmslydia/cascadeImages/nature/images/147091.jpg'  width='95%'  display='block' >",
@@ -798,7 +807,8 @@
       "parent": "nature43",
       "creator": "caitlin_bonnar"
     }
-  },
+  }
+/*,
   "streams": {
     "uist": {
       "id": "uist",
@@ -830,4 +840,4 @@
   "requiredHashtags": [
     "#"
   ]
-}
+}*/

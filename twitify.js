@@ -53,7 +53,7 @@ allData["users"] = {
 //require('./datasets/HCOMP')
 //require('./datasets/pictureTask')
 //require('./datasets/testTweets3');
-
+require('./saved/caitlin and danielle-hierarchy')
 
 /*FOR USER STUDY*/
 
@@ -65,7 +65,7 @@ allData["users"] = {
 
 /*Frenzy Datasets*/
 //require('./datasets/twitterFollowers2')
-require('./datasets/photoAlbum_10-19')
+//require('./datasets/photoAlbum_10-19')
 
 /*Global Frenzy Datasets*/
 //require('./datasets/photoAlbum_20-49')
