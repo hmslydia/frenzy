@@ -1,13 +1,15 @@
+
 //start server
 var express = require('express');
 var fs = require('fs');
 var app = express();
+var lastUpdateTime = 0;
 
 app.use(express.cookieParser()); 
 app.use(express.session({ secret: "keyboard cat" }))
 app.use(express.bodyParser());
 
-var allData = {"tweets":{},"streams":{},"users":{},"requiredHashtags": []}
+var allData = {"tweets":{},"streams":{},"users":{},"requiredHashtags": [], "conversation":[]}
 var numberOfTweetsToDisplayIncrementSize = 2
 
 /*
@@ -31,6 +33,7 @@ allData["tweets"] = {
 allData["streams"] = {
 	"uist": {
         "id": "uist", 
+
         "counter":0
     }
 }
@@ -41,6 +44,13 @@ allData["users"] = {
 		"counter":0
 	}
 }	
+
+allData["conversation"] = [
+	{	"user":"hmslydia",
+		"comment":"Hello World!",
+		"time":0
+	}
+]
 */
 
 //////////////////////////////////////////
@@ -56,6 +66,7 @@ allData["users"] = {
 require('./saved/caitlin and danielle-hierarchy')
 
 /*FOR USER STUDY*/
+
 
 /*MTURK Datasets*/
 
@@ -108,7 +119,7 @@ function initializeAllData(){
     instantiateStreams()
     instantiateUsers()
     instantiateRequiredHashtags()
-
+    instantiateConversation()
     //console.log(getListOfHashTagsForBaseTweet('uist0'))
     //instantiateCompletionCondition()
 	
@@ -158,6 +169,7 @@ function isConditionTrue(num1,attr1,attr1Object,num2,attr2){
 			}
 			else{
 				return false;
+
 			} 
 		}
 	}
@@ -198,6 +210,28 @@ function instantiateStreams(){
 	        "counter":8
 	    }
 	}
+}
+
+function instantiateConversation() {
+	allData["conversation"] = [
+		{	"user":"hmslydia",
+			"comment":"Hello World!",
+			"time": getTime()
+		},
+
+                {       "user":"katlyn",
+			"comment":"I like lots of cats. Cats are the bestest of all",
+			"time": getTime()
+		},
+
+		{       "user":"hmslydia",
+			"comment":"Poooooop",
+			"time": getTime()
+		}
+
+	]
+	console.log("******************************************************")
+	console.log(allData["conversation"]);
 }
 
 function instantiateUsers(){
@@ -389,9 +423,28 @@ app.post('/home.html', function(request, response){
         tweetsArray = utils.dictToArray(allData["tweets"])
         var userTweetObjects = utils.filterArray(tweetsArray, function(x){return x["creator"]==user})
     	response.send(JSON.stringify({"twitterFeed" : userTweetObjects}))
+	}else if(command == "pushComments") {
+       	var comment = args["comment"]
+		var user = args["username"]
+		var time = getTime();
+		allData["conversation"].push({"user":user, "comment":comment, "time":time})
+	    response.send(JSON.stringify({"conversation": getNewConvos(time)})) 
+	}else if (command == "getComments") {
+		var time = getTime();
+	    response.send(JSON.stringify({"conversation": getNewConvos(time)}))
+	} else if(command == "getInitialComments") {
+		response.send(JSON.stringify({"conversation": getNewConvos(0)}))
 	}
     
 })
+
+function getNewConvos(time) {
+	newConversations = utils.filterArray(allData["conversation"], function(x){
+			return x["time"]>=time});
+	lastUpdateTime = time;
+	return newConversations;
+}
+
 //////////////////////////////////////////
 // search helpers
 //////////////////////////////////////////
