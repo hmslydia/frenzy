@@ -342,11 +342,7 @@ $(document).ready(function(){
     });
 
    // Load up initial chat log
-   ajax("getInitialComments", {}, function(returnData) {
-       var commentsObject = JSON.parse(returnData)["conversation"];
-       console.log(commentsObject);
-       updateChatConversation(commentsObject);
-   });
+	getChatConversation() 
 })
 
 function showHide() {

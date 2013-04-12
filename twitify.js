@@ -1,9 +1,7 @@
-
 //start server
 var express = require('express');
 var fs = require('fs');
 var app = express();
-var lastUpdateTime = 0;
 
 app.use(express.cookieParser()); 
 app.use(express.session({ secret: "keyboard cat" }))
@@ -218,20 +216,18 @@ function instantiateConversation() {
 			"comment":"Hello World!",
 			"time": getTime()
 		},
-
-                {       "user":"katlyn",
+		{   "user":"katlyn",
 			"comment":"I like lots of cats. Cats are the bestest of all",
 			"time": getTime()
 		},
-
-		{       "user":"hmslydia",
+		{   "user":"hmslydia",
 			"comment":"Poooooop",
 			"time": getTime()
 		}
 
 	]
-	console.log("******************************************************")
-	console.log(allData["conversation"]);
+	//console.log("******************************************************")
+	//console.log(allData["conversation"]);
 }
 
 function instantiateUsers(){
@@ -257,7 +253,7 @@ app.get('/home.html', function(request, response){
         request.session.logged = true;
         console.log('new session: '+request.session.id);
     }
-
+	request.session.lastUpdateTime = 0
     response.sendfile('home.html')
 });
 
@@ -428,20 +424,25 @@ app.post('/home.html', function(request, response){
 		var user = args["username"]
 		var time = getTime();
 		allData["conversation"].push({"user":user, "comment":comment, "time":time})
-	    response.send(JSON.stringify({"conversation": getNewConvos(time)})) 
+		
+		console.log("pushComments Time: " +time+ " " +comment)
+		
+		var conversation = getNewConvos(request)
+	    response.send(JSON.stringify({"conversation": conversation})) 
 	}else if (command == "getComments") {
-		var time = getTime();
-	    response.send(JSON.stringify({"conversation": getNewConvos(time)}))
-	} else if(command == "getInitialComments") {
-		response.send(JSON.stringify({"conversation": getNewConvos(0)}))
-	}
+	    var conversation = getNewConvos(request)
+	    console.log("getComments Time")
+		response.send(JSON.stringify({"conversation": conversation}))
+	} 
     
 })
 
-function getNewConvos(time) {
-	newConversations = utils.filterArray(allData["conversation"], function(x){
-			return x["time"]>=time});
-	lastUpdateTime = time;
+function getNewConvos(request) {
+	var lastUpdateTime = request.session.lastUpdateTime
+	console.log("lastUpdateTime:    " +lastUpdateTime)
+	var newConversations = utils.filterArray(allData["conversation"], function(x){return x["time"]>=lastUpdateTime});
+	request.session.lastUpdateTime = getTime()
+	console.log("updated update:    " +request.session.lastUpdateTime)
 	return newConversations;
 }
 
@@ -1201,4 +1202,3 @@ function restoreData(timestamp){
 app.listen(3000);
 console.log('Listening on port 3000');
 //restoreData(1)
-
