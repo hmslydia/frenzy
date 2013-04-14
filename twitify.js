@@ -363,15 +363,15 @@ app.post('/home.html', function(request, response){
 	}else if (command == "getRequiredHashtagValues"){
 		requiredHashtagValues = []
 		var tweetIds = args["tweetIds"]
-		console.log(tweetIds)
+		//console.log(tweetIds)
 		for(twtId in tweetIds){
 			tweetId = tweetIds[twtId];
 			console.log("TWEET ID");
 			console.log(tweetId);
 			requiredHashtagValues.push({"tweetId":tweetId,"hashtagValues":getRequiredHashtagValues(tweetId)});
 		}
-		console.log("requiredHashtagValues");
-		console.log(requiredHashtagValues);
+		//console.log("requiredHashtagValues");
+		//console.log(requiredHashtagValues);
 		response.send(JSON.stringify({"requiredHashtagValues":requiredHashtagValues}))
 	
 	}else if (command == "SignIn"){
@@ -425,25 +425,20 @@ app.post('/home.html', function(request, response){
 		var time = getTime();
 		allData["conversation"].push({"user":user, "comment":comment, "time":time})
 		
-		console.log("pushComments Time: " +time+ " " +comment+ " "+request.session.user)
-		
 		var conversation = getNewConvos(request)
 	    response.send(JSON.stringify({"conversation": conversation})) 
         
 	}else if (command == "getComments") {
 	    var conversation = getNewConvos(request)
-	    console.log("getComments "+request.session.id+ " "+request.session.user)
-		response.send(JSON.stringify({"conversation": conversation}))
+	    response.send(JSON.stringify({"conversation": conversation}))
 	} 
     
 })
 
 function getNewConvos(request) {
 	var lastUpdateTime = request.session.lastUpdateTime
-	console.log("lastUpdateTime:    " +lastUpdateTime+ " "+request.session.user)
 	var newConversations = utils.filterArray(allData["conversation"], function(x){return x["time"] > lastUpdateTime});
 	request.session.lastUpdateTime = getTime()
-	console.log("updated update:    " +request.session.lastUpdateTime+ " "+request.session.user)
 	return newConversations;
 }
 
@@ -565,12 +560,7 @@ function getCompletionData(completionConditionHashtags, allTweets){
 	var baseTweetIds = utils.mapArray(baseTweets, function(x){return x["id"]})
     
     var arraySubtraction = utils.arrayMinus(baseTweetIds, currentResults)
-    
-	console.log("currentResults")
-	console.log(currentResults)
-	console.log("")
-	console.log("arraySubtraction")
-	console.log(arraySubtraction)
+
 	return {"matchingBaseTweetIds": currentResults, "nonMatchingBaseTweetIds": arraySubtraction}
 }
 
