@@ -425,13 +425,14 @@ app.post('/home.html', function(request, response){
 		var time = getTime();
 		allData["conversation"].push({"user":user, "comment":comment, "time":time})
 		
-		console.log("pushComments Time: " +time+ " " +comment)
+		console.log("pushComments Time: " +time+ " " +comment+ " "+request.session.user)
 		
 		var conversation = getNewConvos(request)
 	    response.send(JSON.stringify({"conversation": conversation})) 
+        
 	}else if (command == "getComments") {
 	    var conversation = getNewConvos(request)
-	    console.log("getComments Time")
+	    console.log("getComments "+request.session.id+ " "+request.session.user)
 		response.send(JSON.stringify({"conversation": conversation}))
 	} 
     
@@ -439,10 +440,10 @@ app.post('/home.html', function(request, response){
 
 function getNewConvos(request) {
 	var lastUpdateTime = request.session.lastUpdateTime
-	console.log("lastUpdateTime:    " +lastUpdateTime)
-	var newConversations = utils.filterArray(allData["conversation"], function(x){return x["time"]>=lastUpdateTime});
+	console.log("lastUpdateTime:    " +lastUpdateTime+ " "+request.session.user)
+	var newConversations = utils.filterArray(allData["conversation"], function(x){return x["time"] > lastUpdateTime});
 	request.session.lastUpdateTime = getTime()
-	console.log("updated update:    " +request.session.lastUpdateTime)
+	console.log("updated update:    " +request.session.lastUpdateTime+ " "+request.session.user)
 	return newConversations;
 }
 
