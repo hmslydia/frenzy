@@ -183,6 +183,10 @@ label{
 	clear:both;
 	left:-40px;
 }
+#counter{
+	left:75px;
+	color: white;
+}
 .homeImage { 
    position: relative; 
    width: 100%; /* for IE 6 */
@@ -396,7 +400,7 @@ function updateChatConversation(commentsArray) {
    }
 }
 
-//var int=self.setInterval(function(){checkForUpdates()},5000);
+var int=self.setInterval(function(){checkForUpdates()},1000);
 function checkForUpdates(){
 	ajax("getUpdates",{"completionConditionHashtags": getCompletionConditionHashtags()}, function(returnData) {
 		var count = JSON.parse(returnData)["newTweetCount"]
