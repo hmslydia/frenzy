@@ -10,6 +10,8 @@ completionCondition=[
 	}
 ] 
 
+requiredHashtags=["#"]
+
 tweets = {
     "task0": {
         "time": 0, 

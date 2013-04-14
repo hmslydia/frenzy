@@ -7,7 +7,7 @@ app.use(express.cookieParser());
 app.use(express.session({ secret: "keyboard cat" }))
 app.use(express.bodyParser());
 
-var allData = {"tweets":{},"streams":{},"users":{},"requiredHashtags": [], "conversation":[]}
+var allData = {"tweets":{},"streams":{},"users":{},"likes":[],"requiredHashtags": [], "conversation":[]}
 var numberOfTweetsToDisplayIncrementSize = 2
 
 /*
@@ -60,8 +60,8 @@ allData["conversation"] = [
 //require('./datasets/siggraph')
 //require('./datasets/HCOMP')
 //require('./datasets/pictureTask')
-//require('./datasets/testTweets3');
-require('./saved/caitlin and danielle-hierarchy')
+require('./datasets/testTweets3');
+//require('./saved/caitlin and danielle-hierarchy')
 
 /*FOR USER STUDY*/
 
@@ -266,7 +266,7 @@ app.post('/home.html', function(request, response){
         var tweetId=args["tweetId"]        
         var baseTweetId = getBaseTweet(tweetId);
         var returnDiscussionObjects = getDiscussionHierarchy(baseTweetId);        
-        response.send(JSON.stringify({"baseTweetId": baseTweetId, "discussionHierarchy" : returnDiscussionObjects, "hashtagSummary": getHashtagSummary()}))	
+        response.send(JSON.stringify({"baseTweetId": baseTweetId, "discussionHierarchy" : returnDiscussionObjects, "hashtagSummary": getHashtagSummary(),"likes":allData["likes"]}))	
 
     }else if (command == "saveTweet"){    
     	//{"parentTweetId" : parentTweetId, "replyText":replyText,"username":username}      	
@@ -286,7 +286,7 @@ app.post('/home.html', function(request, response){
 		var returnDiscussionObjects=getDiscussionHierarchy(baseTweetId);
 		
         
-	    response.send(JSON.stringify({ "discussionFeed" : returnDiscussionObjects, "hashtagSummary": getHashtagSummary()}));	    
+	    response.send(JSON.stringify({ "discussionFeed" : returnDiscussionObjects, "hashtagSummary": getHashtagSummary(),"likes":allData["likes"]}));	    
   
     }else if (command == "updateTweet"){
         var tweetId=args["tweetId"]
@@ -299,7 +299,24 @@ app.post('/home.html', function(request, response){
         var baseTweetId = getBaseTweet(tweetId);
         var returnDiscussionObjects = getDiscussionHierarchy(baseTweetId);
         
-        response.send(JSON.stringify({"baseTweetId": baseTweetId, "discussionHierarchy" : returnDiscussionObjects, "hashtagSummary": getHashtagSummary()}))
+        response.send(JSON.stringify({"baseTweetId": baseTweetId, "discussionHierarchy" : returnDiscussionObjects, "hashtagSummary": getHashtagSummary(),"likes":allData["likes"]}))
+			
+	}else if (command == "updateLikes"){
+        var tweetId=args["tweetId"]
+        var username=args["username"]
+        var time = getTime();
+        
+        possibleDuplicates = utils.filterArray(allData["likes"], function(x){return (x["id"]==tweetId && x["username"]==username)})
+        console.log("DUPLICATES" + possibleDuplicates);
+        
+        if(possibleDuplicates.length == 0 ){
+	        allData["likes"].push(createNewLikesObject(tweetId,username,time));
+        }
+        
+        console.log(allData["likes"]);
+       
+        
+        response.send("")
 			
 	}else if(command == "createNewTweet"){
 		var tweetText= args["tweetText"]
@@ -318,7 +335,7 @@ app.post('/home.html', function(request, response){
 		
 		request.session.lastRefresh=getTime()
 		
-    	response.send(JSON.stringify({"twitterFeed" : allBaseTweetAndDiscussionObjectsSORTED, "hashtagSummary": getHashtagSummary(),"newTweetCreators":creators}))
+    	response.send(JSON.stringify({"twitterFeed" : allBaseTweetAndDiscussionObjectsSORTED, "hashtagSummary": getHashtagSummary(),"newTweetCreators":creators,"likes":allData["likes"]}))
     	
 	}else if (command == "getTwitterFeed"){
         var allBaseTweetAndDiscussionObjects = getAllBaseTweetAndDiscussionObjects()
@@ -333,7 +350,7 @@ app.post('/home.html', function(request, response){
 		
 		request.session.lastRefresh=getTime()
 		
-    	response.send(JSON.stringify({"twitterFeed" : allBaseTweetAndDiscussionObjectsSORTED, "hashtagSummary": getHashtagSummary(),"newTweetCreators":creators,"requiredHashtags":allData["requiredHashtags"]}))
+    	response.send(JSON.stringify({"twitterFeed" : allBaseTweetAndDiscussionObjectsSORTED, "hashtagSummary": getHashtagSummary(),"newTweetCreators":creators,"requiredHashtags":allData["requiredHashtags"],"likes":allData["likes"]}))
 			
 	}else if(command =="getUpdates"){
         var completionConditionHashtags=args["completionConditionHashtags"];
@@ -358,7 +375,7 @@ app.post('/home.html', function(request, response){
 		
 		//getRequiredHashtagValues("nature100");
 		
-        response.send(JSON.stringify({"newTweetCount":count, "completionDataObjects":completionDataObjects}))
+        response.send(JSON.stringify({"newTweetCount":count, "completionDataObjects":completionDataObjects,"likes":allData["likes"]}))
 		
 	}else if (command == "getRequiredHashtagValues"){
 		requiredHashtagValues = []
@@ -412,7 +429,7 @@ app.post('/home.html', function(request, response){
     	//var returnTweetIds = getSearchTweetOrder(returnTweetObjects);    	
     	//returnTweetObjects = getBaseTweetAndDiscussionObjects(returnTweetIds)     
         
-        response.send(JSON.stringify({"twitterFeed" : matchingTweetAndDiscussionObjectsSORTED, "searchTermArray": searchTermArray, "hashtagSummary": getHashtagSummary(),}))
+        response.send(JSON.stringify({"twitterFeed" : matchingTweetAndDiscussionObjectsSORTED, "searchTermArray": searchTermArray, "hashtagSummary": getHashtagSummary(),"likes":allData["likes"]}))
         
 	}else if (command == "searchUsersTweets"){
         var user = args["user"]
@@ -826,7 +843,23 @@ function createNewTweetObject(parentTweetId,replyText,username){
     
     return tweetObject;
 }
-
+function createNewLikesObject(tweetId,username,time){
+		/*
+	"{
+		"id":uist0,
+		"username":hmslydia,
+        "time": 1
+    }
+    */
+        
+    var tweetObject={
+    	"id":tweetId,
+    	"username":username,
+        "time": time,
+    }
+    
+    return tweetObject;
+}
 function createNewUserObject(newUsername){
 	/*
 	"hmslydia": {

@@ -1,6 +1,8 @@
 function twitterFeedSetup(){
 	ajax("getTwitterFeed", {}, function(returnData) { 
-		displayFeed(JSON.parse(returnData)["twitterFeed"]);
+		console.log("LIKES");
+		console.log(JSON.parse(returnData)["likes"])
+		displayFeed(JSON.parse(returnData)["twitterFeed"],JSON.parse(returnData)["likes"]);
 		displayHashtagSummary(JSON.parse(returnData)["hashtagSummary"])
 		//displayComposeTweet(getUserName())
 		colorNewTweets(JSON.parse(returnData)["newTweetCreators"]);
@@ -49,7 +51,7 @@ function conditionsSetup(){
 }
 
 
-function displayConditionsUpdate(matchingBaseTweetObjects, nonMatchingBaseTweetObjects){
+function displayConditionsUpdate(matchingBaseTweetObjects, nonMatchingBaseTweetObjects,likes){
      $("#completenessFeedback").empty()
      $("#completenessFeedback").css('display','inline-block')
     
@@ -60,14 +62,14 @@ function displayConditionsUpdate(matchingBaseTweetObjects, nonMatchingBaseTweetO
 
 	var happyButton = $("<input type='button' class='btn' id='matchingRequirmentsButton' value='"+numMatchingTweetObjects+" Complete'> ")
 	happyButton.click(function(){
-		displayFeed(matchingBaseTweetObjects)
+		displayFeed(matchingBaseTweetObjects,likes)
 	})
     $("#completenessFeedback").append(happyButton)
     $("#matchingRequirmentsButton").css('margin-right','20px')
 	
 	var sadButton = $("<input type='button' class='btn' id='nonMatchingRequirmentsButton' value='"+numNonMatchingBaseTweetObjects+" In Progress'> ")
 	sadButton.click(function(){
-		displayFeed(nonMatchingBaseTweetObjects)
+		displayFeed(nonMatchingBaseTweetObjects,likes)
 	})
 
 
@@ -84,7 +86,7 @@ function displayConditionsUpdate(matchingBaseTweetObjects, nonMatchingBaseTweetO
 	$("#twitterFeed").css('margin-top',height+5);	
 }
 
-function displayFeed(twitterFeed){
+function displayFeed(twitterFeed,likes){
 	//displayConditionsUpdate([],[])
 	$("#twitterFeed").empty()	
 	
@@ -109,7 +111,7 @@ function displayFeed(twitterFeed){
         tweetObj = twitterFeed[i]["basetweet"]  
         discussionObj = twitterFeed[i]["discussion"]  
         
-        tweetAndDiscussionDiv = createTweetAndDiscussionDiv(tweetObj, discussionObj)
+        tweetAndDiscussionDiv = createTweetAndDiscussionDiv(tweetObj, discussionObj,likes)
 		$("#twitterFeed").append(tweetAndDiscussionDiv);	
 	}
 }
@@ -215,13 +217,13 @@ function getRequiredHashtagValues(baseTweetIds){
 }
 
 
-function createTweetAndDiscussionDiv(tweetObj, discussionObj){
+function createTweetAndDiscussionDiv(tweetObj, discussionObj,likes){
     var tweetAndDiscussionDiv = $("<div class='row'>")
     
     var baseTweetDiv = createTweetDiv(tweetObj)
     
     var discussionDiv = $("<div class='span5 discussionFeed' style='background:white' id='discussion-"+tweetObj["id"]+"'>")    
-    var discussionDivContent = createDiscussionDivContent(discussionObj)
+    var discussionDivContent = createDiscussionDivContent(discussionObj,likes)
     discussionDiv.append(discussionDivContent)
     
     baseTweetId = tweetObj["id"]
@@ -280,14 +282,14 @@ function myfunction(str){
 function colorNewTweets(newDiscussionCreators){
 	for(c in newDiscussionCreators){
 			creator=newDiscussionCreators[c];
-			$("#tweet-"+creator).css('background-color', 'red');
+			$("#tweet-"+creator).css('background-color', 'pink');
 		}
 }
 ///////////////////////////////////////////////////////////////////
 // Use Breadth First Search over the discussion hierarchy to 
 // display the dicussions and replies threaded (indented properly)
 //////////////////////////////////////////////////////////////////
-function createDiscussionDivContent(discussionObj){
+function createDiscussionDivContent(discussionObj,likes){
     var discussionRoot=discussionObj[0]
     var baseTweetId=discussionRoot["tweetObject"]["id"]
 	var children=discussionRoot["children"];
@@ -316,7 +318,7 @@ function createDiscussionDivContent(discussionObj){
 			queue.unshift({"tweet":child,"level":level+1})
 		}
         
-		tweetDiv = createDiscussionDiv(t["tweet"]["tweetObject"], level)
+		tweetDiv = createDiscussionDiv(t["tweet"]["tweetObject"], level,likes)
 		discussionDiv.append(tweetDiv);
 	}
     return discussionDiv
@@ -328,13 +330,14 @@ function createDiscussionDivContent(discussionObj){
 //the user made, the username of the commentor and a reply 
 //button for others to comment on this comment
 //////////////////////////////////////////////////////////////////
-function createDiscussionDiv(tweetObj,level){
+function createDiscussionDiv(tweetObj,level,likes){
 
 	var tweetHTML = tweetObj["html"]
     var tweetId= tweetObj["id"]
     var tweetCreator = tweetObj["creator"]
     
     div = $("<div class='tweet subReplyTextArea' id= 'tweet-"+tweetId+"'>")
+    barDiv = $("<div>")
     //indent the tweet based on how deeply threaded it is
 	//multiply by 30 px per level
     div.css('margin-left',5+level*30+"px");
@@ -353,7 +356,29 @@ function createDiscussionDiv(tweetObj,level){
     }
     wrap(replyButton, postPlaceholderDiv,tweetId)
     
-    var editButton = $("<input type=button id='edit-"+tweetId+"' value='edit' style='float: right;' >")
+    console.log(likes);
+    var likesCount = filterArray(likes, function(x){return x["id"]==tweetId && x["username"]==getUserName()}).length;
+    
+    var userLikesCount = filterArray(likes, function(x){return x["id"]==tweetId && x["username"]==getUserName()}).length;
+   
+    
+    var editButton = $("<input type='button' id='edit-"+tweetId+"' value='edit' style='float: right;' >")
+    var likeButton = $("<input type='button' id='like-"+tweetId+"' value='like' style='float: right;' >")
+   
+    var imageHeight = $("#like-"+tweetId).height()
+    console.log(imageHeight);
+    
+    var likeImage = $("<img id='likeImage' src='http://homes.cs.washington.edu/~felicia0/images/twitify/likeButton.jpg' height='40px' style='float: right; height:25px;'>")
+    
+    
+    if(userLikesCount>0){
+	    likeButton.val("You Like This (unlike)");
+    }
+    else{
+	    likeButton.val("like");
+    }
+   
+    
     wrapEditButton = function (button, replyDiv, currentContent,twtId){
 	    button.click(function(){
 		    displayEditDialog(replyDiv, currentContent,twtId)
@@ -362,13 +387,28 @@ function createDiscussionDiv(tweetObj,level){
     }
     wrapEditButton(editButton, div, tweetHTML,tweetId)
     
+    
+    wrapLikeButton = function (button,twtId,usrLikesCount){
+    button.click(function(){
+   	 console.log("USER LIKES COUNT"+usrLikesCount);
+    	if(usrLikesCount==0){
+    		console.log("click like");
+		    ajax("updateLikes", {"tweetId" : twtId}, function(returnData) {
+			    refreshDiscussion(twtId); 
+		    });
+	    }
+	    
+    })
+    }
+    wrapLikeButton(likeButton,tweetId,userLikesCount)
+    
     div.append(replyContentDiv)
-    div.append(replyButton);
-    div.append(editButton)
-    div.append(postPlaceholderDiv);
-    
-    
-        
+    barDiv.append(replyButton);
+    barDiv.append(editButton)
+    barDiv.append(likeButton);
+    barDiv.append(likeImage);
+    barDiv.append(postPlaceholderDiv);
+    div.append(barDiv)
     return div;
 }
 
@@ -449,7 +489,7 @@ function saveReply(replyText,parentTweetId){
 		ajax("saveTweet", {"parentTweetId" : parentTweetId, "replyText":replyText,"username":username}, function(returnData) {
 		//ajax("saveTweet", {"basparentTweetId" : parentTweetId, "replyText":replyText,"username":username}, function(returnData) {
 			
-	
+			
 			parsedReturnData = JSON.parse(returnData)
 	
 			//discussionFeed=parsedReturnData["discussionFeed"]
@@ -459,11 +499,14 @@ function saveReply(replyText,parentTweetId){
 			
 			var baseTweetFeed=parsedReturnData["twitterFeed"]
 			var discussionFeed=parsedReturnData["discussionFeed"]
+			var likes =  parsedReturnData["likes"]
+			console.log(likes);
 			
 			var baseTweetId = discussionFeed[0]["tweetObject"]["id"]
 			console.log("DISUCSSION FEED");
 			console.log(discussionFeed);
-			updateDiscussionFeed(baseTweetId,discussionFeed)
+			
+			updateDiscussionFeed(baseTweetId,discussionFeed,likes)
 			//displayFeed(baseTweetFeed);
             
 			displayHashtagSummary(JSON.parse(returnData)["hashtagSummary"])
@@ -481,14 +524,14 @@ function saveReply(replyText,parentTweetId){
 	}
 }
 
-function updateDiscussionFeed(baseTweetId,dFeed){
+function updateDiscussionFeed(baseTweetId,dFeed,likes){
 
 	var discussDiv = $("#discussion-"+baseTweetId)
 	console.log(discussDiv);
 	discussDiv.empty();
-		console.log(discussDiv);
+	console.log(discussDiv);
 		
-	var discussionContent =createDiscussionDivContent(dFeed);
+	var discussionContent =createDiscussionDivContent(dFeed,likes);
 	var baseReplyDiv = createBaseReplyDiv(baseTweetId)
     
     

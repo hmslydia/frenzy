@@ -264,6 +264,10 @@ h2 {
 #chatBox.hideChat {
   bottom: -35% !important;
 }
+
+.button{
+	height:40px;
+}
 </style>
 
 
@@ -300,6 +304,7 @@ function signIn(){
 		
 		$("#username").hide();
 		$("#signInOut").hide();
+		goToHome()
 	}
 }
 function signOut(){
@@ -407,22 +412,18 @@ function checkForUpdates(){
 		updateNewTweetCount(count);
         
         var completionDataObjects = JSON.parse(returnData)["completionDataObjects"]
-		displayCompletionData(completionDataObjects)
+        var likes = JSON.parse(returnData)["likes"]
+		displayCompletionData(completionDataObjects,likes)
         
         }
     )
 }
 
-function displayCompletionData(completionDataObjects){
+function displayCompletionData(completionDataObjects,likes){
 	var matchingBaseTweetObjects = completionDataObjects["matchingBaseTweetObjects"]
 	var nonMatchingBaseTweetObjects = completionDataObjects["nonMatchingBaseTweetObjects"]
-	//console.log("")
-	//console.log(matchingBaseTweetObjects)
-	//console.log(nonMatchingBaseTweetObjects)
-	
-	
-	
-	displayConditionsUpdate(matchingBaseTweetObjects, nonMatchingBaseTweetObjects)
+
+	displayConditionsUpdate(matchingBaseTweetObjects, nonMatchingBaseTweetObjects,likes)
 }
 
 function updateNewTweetCount(count){

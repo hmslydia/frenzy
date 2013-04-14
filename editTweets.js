@@ -18,8 +18,8 @@ function refreshDiscussion(tweetId){
         discussionHierarchyForThisBaseTweet = JSON.parse(returnData)["discussionHierarchy"]
         hashtagSummary = JSON.parse(returnData)["hashtagSummary"]
         baseTweetId = JSON.parse(returnData)["baseTweetId"]
-
-        updateDiscussionFeed(baseTweetId,discussionHierarchyForThisBaseTweet)        
+        var likes = JSON.parse(returnData)["likes"]
+        updateDiscussionFeed(baseTweetId,discussionHierarchyForThisBaseTweet,likes)        
         displayHashtagSummary(hashtagSummary)
 	});
 }
