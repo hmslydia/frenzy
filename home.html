@@ -268,6 +268,13 @@ h2 {
 .button{
 	height:40px;
 }
+.newDiscussion{
+	background-color: pink;
+}
+.newLike{
+	font-weight: bold;
+	color:pink;
+}
 </style>
 
 
@@ -290,6 +297,7 @@ function ajax(command, result, cb) {
 function signIn(){
 
 	username=getUserName();
+	console.log('HEYHEY'+username);
 	console.log("signin")
 	if($("#signInOut").val() == "Sign In" && username!=""){
 	

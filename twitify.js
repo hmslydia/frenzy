@@ -312,13 +312,17 @@ app.post('/home.html', function(request, response){
         if(possibleDuplicates.length == 0 ){
 	        allData["likes"].push(createNewLikesObject(tweetId,username,time));
         }
-        
-        console.log(allData["likes"]);
-       
-        
+        else{
+        	console.log("ALL DATA BEFORE");
+        	console.log(allData["likes"])
+	        allData["likes"]=utils.filterArray(allData["likes"], function(x){return( x["id"]!=tweetId && x["username"]!=username)});
+	        console.log("ALL DATA After");
+	        console.log(allData["likes"])
+        }
+                
         response.send("")
 			
-	}else if(command == "createNewTweet"){
+	}/*else if(command == "createNewTweet"){
 		var tweetText= args["tweetText"]
 		var username= args["username"]
 		var newTweetObject=createNewTweetObject("none",tweetText,username);
@@ -329,7 +333,7 @@ app.post('/home.html', function(request, response){
 		var allBaseTweetAndDiscussionObjectsSORTED_ids = sortBaseTweetAndDiscussionObjects(allBaseTweetAndDiscussionObjects, "time")
         var allBaseTweetAndDiscussionObjectsSORTED = getBaseTweetAndDiscussionObjects(allBaseTweetAndDiscussionObjectsSORTED_ids); 
     	
-    	var newTweets=getNewTweetCount(request,utils.dictToArray(allData["tweets"]));
+    	var newTweets=getNewTweetCount(username,request.session.lastRefresh,utils.dictToArray(allData["tweets"]));
 		var count=newTweets["count"];
 		var creators=newTweets["newTweetCreators"]
 		
@@ -337,30 +341,34 @@ app.post('/home.html', function(request, response){
 		
     	response.send(JSON.stringify({"twitterFeed" : allBaseTweetAndDiscussionObjectsSORTED, "hashtagSummary": getHashtagSummary(),"newTweetCreators":creators,"likes":allData["likes"]}))
     	
-	}else if (command == "getTwitterFeed"){
+	}*/else if (command == "getTwitterFeed"){
+		var username= args["username"]
         var allBaseTweetAndDiscussionObjects = getAllBaseTweetAndDiscussionObjects()
-        
         
         var allBaseTweetAndDiscussionObjectsSORTED_ids = sortBaseTweetAndDiscussionObjects(allBaseTweetAndDiscussionObjects, "time")
         var allBaseTweetAndDiscussionObjectsSORTED = getBaseTweetAndDiscussionObjects(allBaseTweetAndDiscussionObjectsSORTED_ids); 
     	
-    	var newTweets=getNewTweetCount(request,utils.dictToArray(allData["tweets"]));
+    	var newTweets=getNewTweetCount(username,request.session.lastRefresh,utils.dictToArray(allData["tweets"]));
 		var count=newTweets["count"];
 		var creators=newTweets["newTweetCreators"]
 		
+		var newLikeIds=getNewLikes(username,request.session.lastRefresh,utils.dictToArray(allData["tweets"]));
+		
 		request.session.lastRefresh=getTime()
 		
-    	response.send(JSON.stringify({"twitterFeed" : allBaseTweetAndDiscussionObjectsSORTED, "hashtagSummary": getHashtagSummary(),"newTweetCreators":creators,"requiredHashtags":allData["requiredHashtags"],"likes":allData["likes"]}))
+    	response.send(JSON.stringify({"twitterFeed" : allBaseTweetAndDiscussionObjectsSORTED, "hashtagSummary": getHashtagSummary(),"newTweetCreators":creators,"newLikeIds":newLikeIds,"requiredHashtags":allData["requiredHashtags"],"likes":allData["likes"]}))
 			
 	}else if(command =="getUpdates"){
+		var username= args["username"]
         var completionConditionHashtags=args["completionConditionHashtags"];
         
         //allData["requiredHashtags"] = completionConditionHashtags.split(",");
         //console.log("allData[requiredHashtags]");
         //console.log(allData["requiredHashtags"]);
         
-		var newTweets=getNewTweetCount(request,utils.dictToArray(allData["tweets"]));
+		var newTweets=getNewTweetCount(username,request.session.lastRefresh,utils.dictToArray(allData["tweets"]));
 		var count=newTweets["count"];
+        var newLikeIds=getNewLikes(username,request.session.lastRefresh,utils.dictToArray(allData["tweets"]));
         
         var completionDataIds = getCompletionData(completionConditionHashtags, allData["tweets"])
         //completionDataIds = {"matchingBaseTweetIds": currentResults, "nonMatchingBaseTweetIds": arraySubtraction}
@@ -375,7 +383,7 @@ app.post('/home.html', function(request, response){
 		
 		//getRequiredHashtagValues("nature100");
 		
-        response.send(JSON.stringify({"newTweetCount":count, "completionDataObjects":completionDataObjects,"likes":allData["likes"]}))
+        response.send(JSON.stringify({"newTweetCount":count, "newLikeIds":newLikeIds,"completionDataObjects":completionDataObjects,"likes":allData["likes"]}))
 		
 	}else if (command == "getRequiredHashtagValues"){
 		requiredHashtagValues = []
@@ -394,6 +402,9 @@ app.post('/home.html', function(request, response){
 	}else if (command == "SignIn"){
     	
     	var newUsername=args["username"];
+    	console.log("***************************");
+    	console.log("newUserName "+newUsername)
+    	console.log("***************************");
         initSession(request, newUsername)
         
     	//User already exists
@@ -587,27 +598,59 @@ function getCompletionData(completionConditionHashtags, allTweets){
 //////////////////////////////////////////
 
 
-function getNewTweetCount(req,tweetObjectArray){
+function getNewTweetCount(user,lastRefresh,tweetObjectArray){
 	var creators=[]
 	var counter=0;
-	var lastRefresh=req.session.lastRefresh
-	var user= req.session.user
-	
+
 	for (t in tweetObjectArray){
 		tweet=tweetObjectArray[t];
 		timeStamp=tweet["time"];
 		tweetCreator=tweet["creator"]
 		if(timeStamp>lastRefresh && user!=tweetCreator){
+			console.log("USER"+user)
+			console.log("TWEET CREATOR"+tweetCreator)
 			counter++;
 			creators.push(tweet["id"]);
 		}
 	}
+	for (t in allData["likes"]){
+		tweet=allData["likes"][t];
+		timeStamp=tweet["time"];
+		tweetCreator=tweet["username"]
+		
+		if(timeStamp>lastRefresh && user!=tweetCreator){
+			console.log("USER"+user)
+			console.log("TWEET CREATOR"+tweetCreator)
+			counter++;
+		}
+	}
+	
 	return {"count":counter,"newTweetCreators":creators};
 }
 
-function initSession(request, user){
+function getNewLikes(user,lastRefresh,tweetObjectArray){
+	var likeIds=[]
 
-    request.session.user = user
+	for (t in allData["likes"]){
+		tweet=allData["likes"][t];
+		timeStamp=tweet["time"];
+		tweetCreator=tweet["username"]
+		
+		if(timeStamp>lastRefresh && user!=tweetCreator){
+			console.log("USER"+user)
+			console.log("TWEET CREATOR"+tweetCreator)
+			counter++;
+			likeIds.push(tweet["id"]);
+		}
+	}
+	
+	return {"newLikeIds":likeIds};
+}
+
+function initSession(request, theUser){
+	console.log(theUser)
+    request.session.user = theUser
+    console.log(request.session.user)
     request.session.lastRefresh=getTime();
     request.session.numberToDisplay = numberOfTweetsToDisplayIncrementSize
     request.session.query = ""

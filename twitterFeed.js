@@ -6,6 +6,7 @@ function twitterFeedSetup(){
 		displayHashtagSummary(JSON.parse(returnData)["hashtagSummary"])
 		//displayComposeTweet(getUserName())
 		colorNewTweets(JSON.parse(returnData)["newTweetCreators"]);
+		colorNewLikes(JSON.parse(returnData)["newLikeIds"])
 		setRequiredHashtags(JSON.parse(returnData)["requiredHashtags"])
 	});
 	checkForUpdates()
@@ -282,8 +283,19 @@ function myfunction(str){
 function colorNewTweets(newDiscussionCreators){
 	for(c in newDiscussionCreators){
 			creator=newDiscussionCreators[c];
-			$("#tweet-"+creator).css('background-color', 'pink');
-		}
+			$("#tweet-"+creator).addClass("newDiscussion")
+			//css('background-color', 'pink');
+	}
+}
+
+function colorNewLikes(newLikeIds){
+console.log("COLOR NEW LIKES");
+	console.log(newLikeIds)
+	for(c in newLikeIds){
+		newLikeId=newLikeIds[c];
+		$("#likesCount-"+newLikeId).addClass("newLike")
+
+	}
 }
 ///////////////////////////////////////////////////////////////////
 // Use Breadth First Search over the discussion hierarchy to 
@@ -337,7 +349,7 @@ function createDiscussionDiv(tweetObj,level,likes){
     var tweetCreator = tweetObj["creator"]
     
     div = $("<div class='tweet subReplyTextArea' id= 'tweet-"+tweetId+"'>")
-    barDiv = $("<div>")
+    barDiv = $("<div style='margin-top:25px;'>")
     //indent the tweet based on how deeply threaded it is
 	//multiply by 30 px per level
     div.css('margin-left',5+level*30+"px");
@@ -357,7 +369,8 @@ function createDiscussionDiv(tweetObj,level,likes){
     wrap(replyButton, postPlaceholderDiv,tweetId)
     
     console.log(likes);
-    var likesCount = filterArray(likes, function(x){return x["id"]==tweetId && x["username"]==getUserName()}).length;
+    
+    var likesCount = filterArray(likes, function(x){return x["id"]==tweetId}).length;
     
     var userLikesCount = filterArray(likes, function(x){return x["id"]==tweetId && x["username"]==getUserName()}).length;
    
@@ -365,14 +378,18 @@ function createDiscussionDiv(tweetObj,level,likes){
     var editButton = $("<input type='button' id='edit-"+tweetId+"' value='edit' style='float: right;' >")
     var likeButton = $("<input type='button' id='like-"+tweetId+"' value='like' style='float: right;' >")
    
-    var imageHeight = $("#like-"+tweetId).height()
-    console.log(imageHeight);
     
-    var likeImage = $("<img id='likeImage' src='http://homes.cs.washington.edu/~felicia0/images/twitify/likeButton.jpg' height='40px' style='float: right; height:25px;'>")
+    var likeImage = $("<img id='likeImage' src='http://homes.cs.washington.edu/~felicia0/images/twitify/likeButton.png' height='40px' style='float: right; height:25px;'>")
     
+    
+    var label = $("<span id='likesCount-"+tweetId+"'>");
+    label.text("("+likesCount +")");
+    label.css('height','25px');
+    label.css('float','right');
+    label.css('padding-top','4px');
     
     if(userLikesCount>0){
-	    likeButton.val("You Like This (unlike)");
+	    likeButton.val("Unlike");
     }
     else{
 	    likeButton.val("like");
@@ -397,6 +414,11 @@ function createDiscussionDiv(tweetObj,level,likes){
 			    refreshDiscussion(twtId); 
 		    });
 	    }
+	    else{
+		    ajax("updateLikes", {"tweetId" : twtId}, function(returnData) {
+			    refreshDiscussion(twtId); 
+		    });
+	    }
 	    
     })
     }
@@ -406,7 +428,14 @@ function createDiscussionDiv(tweetObj,level,likes){
     barDiv.append(replyButton);
     barDiv.append(editButton)
     barDiv.append(likeButton);
-    barDiv.append(likeImage);
+    console.log('********************')
+    console.log("LIKES COUNT"+likesCount);
+    console.log('********************')
+    if(likesCount >0){
+        barDiv.append(likeImage);
+	    barDiv.append(label);
+    }
+    
     barDiv.append(postPlaceholderDiv);
     div.append(barDiv)
     return div;
