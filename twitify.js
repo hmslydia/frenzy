@@ -406,15 +406,9 @@ app.post('/home.html', function(request, response){
 		var username= args["username"]
         var completionConditionHashtags=args["completionConditionHashtags"];
         
-<<<<<<< HEAD
-        //allData["requiredHashtags"] = completionConditionHashtags.split(",");
-        //console.log("allData[requiredHashtags]");
-        //console.log(allData["requiredHashtags"]);
         
 		var newTweets=getNewTweetCount(username,request.session.lastRefresh,utils.dictToArray(allData["tweets"]));
-=======
-		var newTweets=getNewTweetCount(request,utils.dictToArray(allData["tweets"]));
->>>>>>> 5cd3fccccd7a792a42039a9530c3ca20d9ca3415
+
 		var count=newTweets["count"];
         var newLikeIds=getNewLikes(username,request.session.lastRefresh,utils.dictToArray(allData["tweets"]));
         
@@ -426,17 +420,9 @@ app.post('/home.html', function(request, response){
 		completionDataObjects["nonMatchingBaseTweetObjects"] = getBaseTweetAndDiscussionObjects(completionDataIds["nonMatchingBaseTweetIds"])
 		//var matchingTweetIdsSORTED = sortBaseTweetAndDiscussionObjects(matchingTweetObjects, "default")
         //var matchingTweetAndDiscussionObjectsSORTED = getBaseTweetAndDiscussionObjects(matchingTweetIdsSORTED); 
-<<<<<<< HEAD
-		
-		
-		
-		//getRequiredHashtagValues("nature100");
 		
         response.send(JSON.stringify({"newTweetCount":count, "newLikeIds":newLikeIds,"completionDataObjects":completionDataObjects,"likes":allData["likes"]}))
-=======
-				
-        response.send(JSON.stringify({"newTweetCount":count, "completionDataObjects":completionDataObjects}))
->>>>>>> 5cd3fccccd7a792a42039a9530c3ca20d9ca3415
+
 		
 	}else if (command == "getRequiredHashtagValues"){
 		requiredHashtagValues = []
