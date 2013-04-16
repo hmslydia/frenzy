@@ -216,11 +216,19 @@ function getRequiredHashtagValues(baseTweetIds){
 
 
 function createTweetAndDiscussionDiv(tweetObj, discussionObj){
+    //alert("asdf")
     var tweetAndDiscussionDiv = $("<div class='row'>")
     
     var baseTweetDiv = createTweetDiv(tweetObj)
     
     var discussionDiv = $("<div class='span5 discussionFeed' style='background:white' id='discussion-"+tweetObj["id"]+"'>")    
+    wrap = function(div, id){
+        $(div).click(function(index){
+            ajax("updateLocation",{"id":id},function(){})
+        })
+    }
+    wrap(discussionDiv, tweetObj["id"] )
+    
     var discussionDivContent = createDiscussionDivContent(discussionObj)
     discussionDiv.append(discussionDivContent)
     

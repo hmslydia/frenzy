@@ -264,6 +264,10 @@ h2 {
 #chatBox.hideChat {
   bottom: -35% !important;
 }
+
+.beingEdited{
+    border: 5px solid blue;
+}
 </style>
 
 
@@ -284,7 +288,6 @@ function ajax(command, result, cb) {
 }
 
 function signIn(){
-
 	username=getUserName();
 	console.log("signin")
 	if($("#signInOut").val() == "Sign In" && username!=""){
@@ -334,7 +337,8 @@ $(document).ready(function(){
        }
     })
 
-    $("#chatTitleBar span").click(showHide);
+    //set up chat
+    $("#chatTitleBar span").click(showHideChat);
 
 
     $("#sendChat").click(function(event) {
@@ -347,9 +351,10 @@ $(document).ready(function(){
 
    // Load up initial chat log
 	getChatConversation() 
+        
 })
 
-function showHide() {
+function showHideChat() {
   if(chatShowing) {
     chatShowing = false;
     $("#chatBox").addClass("hideChat");
@@ -365,7 +370,41 @@ function getCompletionConditionHashtags(){
     return requirementString;
 }
 
-var timer = setInterval(function(){getChatConversation()}, 5000);
+//////////////////////////////////////////
+// visualizing other editor helpers
+//////////////////////////////////////////
+var userLocationUpdateTimer = setInterval(function(){updateUserLocations()}, 5000);
+
+function updateUserLocations(){
+    ajax("getLocations", {}, function(returnData) {
+       var locations = JSON.parse(returnData)["locations"];
+console.log(locations)       
+       var username = getUserName()
+       var idsInUse = filterArray(locations, function(x){return x["user"] != username})
+       var idsInUse = map(idsInUse, function(x){return x["id"]})       
+       highlightBaseTweets(idsInUse)
+   });   
+}
+
+function highlightBaseTweets(listOfBasetweetIdsToHighlight){
+    //remove all highlights
+    $(".basetweet").each(function( index){
+        $(this).removeClass("beingEdited")
+    });
+    
+    //highlight the ones we being discussed
+    for(i in listOfBasetweetIdsToHighlight){
+        var idToHightlight = listOfBasetweetIdsToHighlight[i]
+        console.log(idToHightlight)
+        $("#"+idToHightlight).addClass("beingEdited")
+        console.log($("#"+idToHightlight))
+    }    
+}
+
+//////////////////////////////////////////
+// chat helpers
+//////////////////////////////////////////
+//var timer = setInterval(function(){getChatConversation()}, 5000);
 
 function getChatConversation() {
    ajax("getComments", {}, function(returnData) {
@@ -400,7 +439,10 @@ function updateChatConversation(commentsArray) {
    }
 }
 
-var int=self.setInterval(function(){checkForUpdates()},1000);
+//////////////////////////////////////////
+// completion update helpers
+//////////////////////////////////////////
+//var int=self.setInterval(function(){checkForUpdates()},1000);
 function checkForUpdates(){
 	ajax("getUpdates",{"completionConditionHashtags": getCompletionConditionHashtags()}, function(returnData) {
 		var count = JSON.parse(returnData)["newTweetCount"]

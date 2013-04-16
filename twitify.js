@@ -7,7 +7,7 @@ app.use(express.cookieParser());
 app.use(express.session({ secret: "keyboard cat" }))
 app.use(express.bodyParser());
 
-var allData = {"tweets":{},"streams":{},"users":{},"requiredHashtags": [], "conversation":[]}
+var allData = {"tweets":{},"streams":{},"users":{},"requiredHashtags": [], "conversation":[], "currentLocations":[], "history":{"locations":[], "clicks":[]}}
 var numberOfTweetsToDisplayIncrementSize = 2
 
 /*
@@ -48,7 +48,20 @@ allData["conversation"] = [
 		"comment":"Hello World!",
 		"time":0
 	}
+    
+    
+allData["currentlocation"] = [
+	{	"user":"hmslydia",
+		"location":"uist0"
+	}    
 ]
+allData["history"]["location"] = [
+	{	"user":"hmslydia",
+		"location":"uist0",
+		"time":0
+	}    
+]
+
 */
 
 //////////////////////////////////////////
@@ -127,7 +140,7 @@ function initializeAllData(){
 function instantiateRequiredHashtags(){
 	allData["requiredHashtags"] = requiredHashtags
 }
-
+/*
 function instantiateCompletionCondition(){
 
     for(c in completionCondition){
@@ -148,6 +161,7 @@ function instantiateCompletionCondition(){
 
     }
 }
+*/
 
 function isConditionTrue(num1,attr1,attr1Object,num2,attr2){
 
@@ -256,7 +270,36 @@ app.get('/home.html', function(request, response){
 	request.session.lastUpdateTime = 0
     response.sendfile('home.html')
 });
+/*
+SignIn
+getTwitterFeed
+getDiscussion
 
+//TWEET CRUD
+saveTweet
+updateTweet
+createNewTweet
+
+
+
+//SEARCH
+searchTweets
+searchUsersTweets
+
+//CONSTANT FEEDBACK
+//COMPLETION TOWARDS GOAL
+getUpdates
+getRequiredHashtagValues
+
+//CHAT
+pushComments //conversation or chat
+getComments //convervation or chat
+
+//OTHER USER LOCATIONS
+pushLocation
+
+
+*/
 app.post('/home.html', function(request, response){
     command = request.body["command"]
 	args = JSON.parse(request.body["args"])	
@@ -338,10 +381,6 @@ app.post('/home.html', function(request, response){
 	}else if(command =="getUpdates"){
         var completionConditionHashtags=args["completionConditionHashtags"];
         
-        //allData["requiredHashtags"] = completionConditionHashtags.split(",");
-        //console.log("allData[requiredHashtags]");
-        //console.log(allData["requiredHashtags"]);
-        
 		var newTweets=getNewTweetCount(request,utils.dictToArray(allData["tweets"]));
 		var count=newTweets["count"];
         
@@ -353,25 +392,16 @@ app.post('/home.html', function(request, response){
 		completionDataObjects["nonMatchingBaseTweetObjects"] = getBaseTweetAndDiscussionObjects(completionDataIds["nonMatchingBaseTweetIds"])
 		//var matchingTweetIdsSORTED = sortBaseTweetAndDiscussionObjects(matchingTweetObjects, "default")
         //var matchingTweetAndDiscussionObjectsSORTED = getBaseTweetAndDiscussionObjects(matchingTweetIdsSORTED); 
-		
-		
-		
-		//getRequiredHashtagValues("nature100");
-		
+				
         response.send(JSON.stringify({"newTweetCount":count, "completionDataObjects":completionDataObjects}))
 		
 	}else if (command == "getRequiredHashtagValues"){
 		requiredHashtagValues = []
 		var tweetIds = args["tweetIds"]
-		//console.log(tweetIds)
 		for(twtId in tweetIds){
 			tweetId = tweetIds[twtId];
-			console.log("TWEET ID");
-			console.log(tweetId);
 			requiredHashtagValues.push({"tweetId":tweetId,"hashtagValues":getRequiredHashtagValues(tweetId)});
 		}
-		//console.log("requiredHashtagValues");
-		//console.log(requiredHashtagValues);
 		response.send(JSON.stringify({"requiredHashtagValues":requiredHashtagValues}))
 	
 	}else if (command == "SignIn"){
@@ -419,6 +449,7 @@ app.post('/home.html', function(request, response){
         tweetsArray = utils.dictToArray(allData["tweets"])
         var userTweetObjects = utils.filterArray(tweetsArray, function(x){return x["creator"]==user})
     	response.send(JSON.stringify({"twitterFeed" : userTweetObjects}))
+        
 	}else if(command == "pushComments") {
        	var comment = args["comment"]
 		var user = args["username"]
@@ -431,7 +462,21 @@ app.post('/home.html', function(request, response){
 	}else if (command == "getComments") {
 	    var conversation = getNewConvos(request)
 	    response.send(JSON.stringify({"conversation": conversation}))
-	} 
+        
+	}else if (command == "getLocations") {
+        var currentLocations = allData["currentLocations"]
+        console.log(currentLocations)
+	    response.send(JSON.stringify({"locations": currentLocations}))
+	}else if (command == "updateLocation") {
+        
+		var username = args["username"]
+        var itemId = args["id"]
+        updateUserLocation(username, itemId)
+        //console.log("user: "+username+" itemId: "+itemId)
+        //var currentLocations = allData["currentLocations"]
+	    //response.send(JSON.stringify({"locations": currentLocations}))
+        response.send("")
+	}    
     
 })
 
@@ -498,7 +543,6 @@ function getQueryResultIds(searchQuery, allTweets){
     }
 }
 
-
 function findMatchingTweetIds(searchQuery, allTweets){
     rtn = []
 
@@ -525,9 +569,6 @@ function findMatchingTweetIds(searchQuery, allTweets){
     
     return rtn
 }
-
-
-
 
 function getCompletionData(completionConditionHashtags, allTweets){
     completionConditionHashtags = completionConditionHashtags
@@ -563,6 +604,37 @@ function getCompletionData(completionConditionHashtags, allTweets){
 
 	return {"matchingBaseTweetIds": currentResults, "nonMatchingBaseTweetIds": arraySubtraction}
 }
+
+
+//////////////////////////////////////////
+// location helpers
+//////////////////////////////////////////
+function updateUserLocation(username, itemId){
+    var newLocationObject = {"user": username, "id":itemId, "time":getTime()}
+        
+    var currentLocations = allData["currentLocations"]
+    
+    var thisUsersCurrentLocation = utils.filterArray(currentLocations, function(x){return x["user"] == username})
+    
+    if(thisUsersCurrentLocation.length == 0 ){
+        currentLocations.push({"user":username, "id": itemId})
+        allData["history"]["locations"].push(newLocationObject)
+        
+    }else{
+        var thisUsersCurrentLocation = thisUsersCurrentLocation[0]
+        var currentUserLocationId = thisUsersCurrentLocation["id"]
+        
+        //if the location is new, update the current location and push it on the history list
+        if(currentUserLocationId != itemId){
+            thisUsersCurrentLocation["id"] = itemId   
+            allData["history"]["locations"].push(newLocationObject)
+        }
+    }
+    
+}
+
+
+
 
 
 //////////////////////////////////////////
