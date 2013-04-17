@@ -12,10 +12,14 @@ function updateTweet(tweetId, newContent){
 }
 
 function refreshDiscussion(tweetId){
+
     ajax("getDiscussion", {"tweetId":tweetId}, function(returnData) {
         //bold the term that was searched
         
         discussionHierarchyForThisBaseTweet = JSON.parse(returnData)["discussionHierarchy"]
+        
+        tweetClickUpdateTimes[tweetId]["lastRefreshTime"] = getTime();
+        
         hashtagSummary = JSON.parse(returnData)["hashtagSummary"]
         baseTweetId = JSON.parse(returnData)["baseTweetId"]
         var likes = JSON.parse(returnData)["likes"]
@@ -23,7 +27,6 @@ function refreshDiscussion(tweetId){
         displayHashtagSummary(hashtagSummary)
 	});
 }
-
 
 function displayEditDialog(replyContentDiv, tweetHTML, tweetId){
     $(replyContentDiv).empty()

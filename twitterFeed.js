@@ -1,22 +1,42 @@
+tweetClickUpdateTimes = []
+
 function twitterFeedSetup(){
 	ajax("getTwitterFeed", {}, function(returnData) { 
-		console.log("LIKES");
-		console.log(JSON.parse(returnData)["likes"])
+
+		var twitterFeed = JSON.parse(returnData)["twitterFeed"]
+		var lastRefreshTime = JSON.parse(returnData)["lastRefreshTime"]
+		resetTweetClickUpdateTimes(twitterFeed,lastRefreshTime);
+		
 		displayFeed(JSON.parse(returnData)["twitterFeed"],JSON.parse(returnData)["likes"]);
 		displayHashtagSummary(JSON.parse(returnData)["hashtagSummary"])
-		//displayComposeTweet(getUserName())
+
 		colorNewTweets(JSON.parse(returnData)["newTweetCreators"]);
+
 		colorNewLikes(JSON.parse(returnData)["newLikeIds"])
 		setRequiredHashtags(JSON.parse(returnData)["requiredHashtags"])
 	});
 	checkForUpdates()
 }
 
+
+function resetTweetClickUpdateTimes(twitterFeed,lastRefreshTime){
+	for(var i = 0; i < twitterFeed.length; i++) {
+		var tweet = twitterFeed[i]["basetweet"]
+		var tweetId = tweet["id"]
+		tweetClickUpdateTimes[tweetId]=({"tweetId": tweetId,"lastRefreshTime":lastRefreshTime})
+	}
+}
+
+function getTime(){
+	var d = new Date();
+	return d.getTime()
+}
+
+
 function setRequiredHashtags(requiredHashtags){
-	console.log($("#requirements").text());
-	console.log(requiredHashtags)
+
 	$("#requirements").val(requiredHashtags.toString());
-	console.log($("#requirements").text());
+
 }
 
 function conditionsSetup(){
@@ -57,7 +77,7 @@ function displayConditionsUpdate(matchingBaseTweetObjects, nonMatchingBaseTweetO
      $("#completenessFeedback").css('display','inline-block')
     
      $("#completenessFeedback").css('margin-left','75px')
-    //console.log("displayConditionsUpdate")
+
 	var numMatchingTweetObjects = matchingBaseTweetObjects.length
 	var numNonMatchingBaseTweetObjects = nonMatchingBaseTweetObjects.length
 
@@ -113,7 +133,8 @@ function displayFeed(twitterFeed,likes){
         discussionObj = twitterFeed[i]["discussion"]  
         
         tweetAndDiscussionDiv = createTweetAndDiscussionDiv(tweetObj, discussionObj,likes)
-		$("#twitterFeed").append(tweetAndDiscussionDiv);	
+		$("#twitterFeed").append(tweetAndDiscussionDiv);
+			
 	}
 }
 
@@ -125,20 +146,17 @@ function outputTable(outputButton){
 	csv += "</p></body></html>";
 	csv+= "<table>"
 	
-	//var csv=$("<div>")
-	console.log("OUTPUT TABLE");
+
 	ajax("getTwitterFeed", {}, function(returnData) {
 		var twitterFeed = JSON.parse(returnData)["twitterFeed"]
 		var baseTweetHashtagSummary = JSON.parse(returnData)["hashtagSummary"]
 		
 		var baseTweets = map(twitterFeed, function(x){return x["basetweet"] })
 		var baseTweetIds = map(baseTweets, function(x){return x["id"]});
-		console.log(baseTweetIds);
 		
 		ajax("getRequiredHashtagValues", {"tweetIds":baseTweetIds}, function(returnData) { 
 				var hashtagValues = (JSON.parse(returnData))["requiredHashtagValues"];
-				console.log("OUTPUT TABLE");
-				console.log(hashtagValues)
+
 				
 				csv+=createTableRows(csv, baseTweets, hashtagValues)
 				csv+= "</table>"
@@ -165,9 +183,9 @@ function createTableRows(csv,baseTweets, requiredHashtagValues){
 	csv+=line+"</tr>"
 	for(bt in baseTweets){
 		baseTweet = baseTweets[bt]
-		console.log(requiredHashtagValues)
+
 		var hashtagValuesForTweet = filterArray(requiredHashtagValues, function(x){return x["tweetId"]==baseTweet["id"]})[0]["hashtagValues"];
-		console.log(hashtagValuesForTweet);
+
 		
 		//baseTweetHashtags = getListOfHashTagsForBaseTweet(baseTweet["id"],baseTweetHashtagSummary);
 		var line="<tr><td>"+baseTweet["html"]+"</td>"
@@ -176,35 +194,17 @@ function createTableRows(csv,baseTweets, requiredHashtagValues){
 			completionHashtag = ccList[cc].replace(/^\s*/, "").replace(/\s*$/, "");
 			
 			var values = filterArray(hashtagValuesForTweet,function(x){return x["hashtag"]==completionHashtag.toLowerCase()});
-			console.log("values" + baseTweet["id"] +"  " +completionHashtag)
-			console.log(hashtagValuesForTweet);
-			console.log(values);
+
 			line += "<td>"
 			for(v in values){
 				var value = values[v]["value"]
 				line+=value + "  "
 			}
 			line += "</td>"
-			//+hashtagValues[completionHashtag.toLowerCase()]+"</td>"
-			/*if(baseTweetHashtags.indexOf(completionHashtag)>-1){
-				line+="<td>,1</td>"
-			}
-			else{
-				line+="<td>,0</td>"
-			}*/
 		}
 		csv+=line+"</tr>"
 		
 	}
-	console.log("CSV");
-	console.log(csv);
-	//var completionConditionString = getCompletionConditionHashtags()
-	//var ccList = completionConditionString.split(',');
-	
-	//var baseTweets = 
-	//var hashtags = getListOfHashTagsForBaseTweet(baseTweetHashtagSummary)	
-	
-	//SAVE CSV FILE CALL TO AJAX
 	return csv;
 }
 
@@ -213,7 +213,6 @@ function getRequiredHashtagValues(baseTweetIds){
 	ajax("getRequiredHashtagValues", baseTweetIds, function(returnData) { 
 		return JSON.parse(returnData);
 	});
-	console.log(hashtagValues);
 	return hashtagValues;
 }
 
@@ -249,11 +248,12 @@ function createTweetAndDiscussionDiv(tweetObj, discussionObj,likes){
 }
 
 function createTweetDiv(tweetObj){
-    tweetHTML = tweetObj["html"]
-    tweetId= tweetObj["id"]
-    tweetCreator = tweetObj["creator"]
+    var tweetHTML = tweetObj["html"]
+    var tweetId= tweetObj["id"]
+    var tweetCreator = tweetObj["creator"]
     
-    div = $("<div class='span4 basetweet' id= '"+tweetId+"'>")
+    clickableDiv = $("<a id='clickable-"+tweetId+"' href='#' >");
+    div = $("<div class='span4 basetweet' id= 'tweet-"+tweetId+"'>")
     
     tweetCreatorSpan = $("<span class='user'>")
     tweetCreatorSpan.text(tweetCreator)
@@ -268,24 +268,27 @@ function createTweetDiv(tweetObj){
                 
     tweetHTMLSpan.html(tweetHTML)
     div.append(tweetHTMLSpan)
-    /*    
-    wrap1 = function(d, tweetId){
+        
+    wrap1 = function(d, twtId){
         d.click(function(){
-            selectTweet(this, tweetId)
+            refreshDiscussion(twtId)
+            $("#tweet-"+tweetId).removeClass('newDiscussion2');
+            tweetClickUpdateTimes[twtId]["lastRefreshTime"] = getTime();
         })
     }
-    wrap1(tweetHTMLSpan, tweetId)
-    */
+    wrap1(clickableDiv, tweetId)
+    
     wrap2 = function(span, creator){
         span.click(function(){
-        console.log("creator: "+creator)
-            userSearch(creator)
+        userSearch(creator)
         })
     }
     wrap2(tweetCreatorSpan, tweetCreator)
     
-    return div
+    clickableDiv.append(div);
+    return clickableDiv
 }
+
 
 function myfunction(str){
     //alert(str)
@@ -300,9 +303,29 @@ function colorNewTweets(newDiscussionCreators){
 	}
 }
 
+function colorNewTweetsInTheFeedAndUpdateNewTweetCount(newDiscussionCreators){
+	var count = 0;
+	ajax("getBaseTweetIds", {"tweetIds" : newDiscussionCreators}, function(returnData) {
+		var baseTweetIds = JSON.parse(returnData)["baseTweetIds"]
+		var lastRefreshTime = JSON.parse(returnData)["lastRefreshTime"]
+		var twitterFeed = JSON.parse(returnData)["tweets"]
+		
+		for(c in baseTweetIds){
+			creator=baseTweetIds[c];
+			if(tweetClickUpdateTimes[creator]['lastRefreshTime'] < twitterFeed[newDiscussionCreators[c]]['time'] ){
+				$("#tweet-"+creator).addClass("newDiscussion2")
+				count++;
+			}
+			else{
+				$("#tweet-"+creator).removeClass('newDiscussion2');
+			}
+		}
+		updateNewTweetCount(count);
+	});
+}
+
 function colorNewLikes(newLikeIds){
-console.log("COLOR NEW LIKES");
-	console.log(newLikeIds)
+
 	for(c in newLikeIds){
 		newLikeId=newLikeIds[c];
 		$("#likesCount-"+newLikeId).addClass("newLike")
@@ -379,9 +402,7 @@ function createDiscussionDiv(tweetObj,level,likes){
 	    })
     }
     wrap(replyButton, postPlaceholderDiv,tweetId)
-    
-    console.log(likes);
-    
+
     var likesCount = filterArray(likes, function(x){return x["id"]==tweetId}).length;
     
     var userLikesCount = filterArray(likes, function(x){return x["id"]==tweetId && x["username"]==getUserName()}).length;
@@ -419,14 +440,7 @@ function createDiscussionDiv(tweetObj,level,likes){
     
     wrapLikeButton = function (button,twtId,usrLikesCount){
     button.click(function(){
-   	 console.log("USER LIKES COUNT"+usrLikesCount);
     	if(usrLikesCount==0){
-    		console.log("click like");
-		    ajax("updateLikes", {"tweetId" : twtId}, function(returnData) {
-			    refreshDiscussion(twtId); 
-		    });
-	    }
-	    else{
 		    ajax("updateLikes", {"tweetId" : twtId}, function(returnData) {
 			    refreshDiscussion(twtId); 
 		    });
@@ -440,9 +454,6 @@ function createDiscussionDiv(tweetObj,level,likes){
     barDiv.append(replyButton);
     barDiv.append(editButton)
     barDiv.append(likeButton);
-    console.log('********************')
-    console.log("LIKES COUNT"+likesCount);
-    console.log('********************')
     if(likesCount >0){
         barDiv.append(likeImage);
 	    barDiv.append(label);
@@ -527,37 +538,20 @@ function saveReply(replyText,parentTweetId){
 	username=getUserName();
 	if(username!="" && $("#signInOut").val()!="Sign In"){
 		
-		ajax("saveTweet", {"parentTweetId" : parentTweetId, "replyText":replyText,"username":username}, function(returnData) {
-		//ajax("saveTweet", {"basparentTweetId" : parentTweetId, "replyText":replyText,"username":username}, function(returnData) {
-			
+		ajax("saveTweet", {"parentTweetId" : parentTweetId, "replyText":replyText,"username":username}, function(returnData) {	
 			
 			parsedReturnData = JSON.parse(returnData)
-	
-			//discussionFeed=parsedReturnData["discussionFeed"]
-			//displayDiscussion(discussionFeed);
-			
-			//createBaseReplyDiv(parentTweetId);
-			
 			var baseTweetFeed=parsedReturnData["twitterFeed"]
 			var discussionFeed=parsedReturnData["discussionFeed"]
 			var likes =  parsedReturnData["likes"]
-			console.log(likes);
 			
 			var baseTweetId = discussionFeed[0]["tweetObject"]["id"]
-			console.log("DISUCSSION FEED");
-			console.log(discussionFeed);
 			
 			updateDiscussionFeed(baseTweetId,discussionFeed,likes)
-			//displayFeed(baseTweetFeed);
             
 			displayHashtagSummary(JSON.parse(returnData)["hashtagSummary"])
 			checkForUpdates();
-			/*
-			parsedReturnData = JSON.parse(returnData)
-			discussionFeed=parsedReturnData["discussionFeed"]
-			displayDiscussion(discussionFeed);
-			toggleReplyDiv(tweetId);
-			*/
+
 		});
 	}
 	else{
@@ -566,18 +560,13 @@ function saveReply(replyText,parentTweetId){
 }
 
 function updateDiscussionFeed(baseTweetId,dFeed,likes){
-
+	tweetClickUpdateTimes[baseTweetId]["lastRefreshTime"] = getTime();
 	var discussDiv = $("#discussion-"+baseTweetId)
-	console.log(discussDiv);
 	discussDiv.empty();
-	console.log(discussDiv);
 		
 	var discussionContent =createDiscussionDivContent(dFeed,likes);
 	var baseReplyDiv = createBaseReplyDiv(baseTweetId)
     
-    
-	console.log("DISCUSSION CONTENT");
-	console.log(discussionContent);
 	discussDiv.append(discussionContent);
 	discussDiv.append(baseReplyDiv);
 }

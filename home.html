@@ -271,6 +271,9 @@ h2 {
 .newDiscussion{
 	background-color: pink;
 }
+.newDiscussion2{
+	background-color: yellow;
+}
 .newLike{
 	font-weight: bold;
 	color:pink;
@@ -299,8 +302,7 @@ function ajax(command, result, cb) {
 
 function signIn(){
 	username=getUserName();
-	console.log('HEYHEY'+username);
-	console.log("signin")
+
 	if($("#signInOut").val() == "Sign In" && username!=""){
 	
 		$("#signInOut").val("Sign Out")
@@ -378,7 +380,7 @@ function showHideChat() {
 
 function getCompletionConditionHashtags(){
     var requirementString = $("#requirements").val()
-    //console.log("requirementString "+ requirementString);
+
     return requirementString;
 }
 
@@ -390,7 +392,7 @@ var userLocationUpdateTimer = setInterval(function(){updateUserLocations()}, 500
 function updateUserLocations(){
     ajax("getLocations", {}, function(returnData) {
        var locations = JSON.parse(returnData)["locations"];
-console.log(locations)       
+   
        var username = getUserName()
        var idsInUse = filterArray(locations, function(x){return x["user"] != username})
        var idsInUse = map(idsInUse, function(x){return x["id"]})       
@@ -407,9 +409,9 @@ function highlightBaseTweets(listOfBasetweetIdsToHighlight){
     //highlight the ones we being discussed
     for(i in listOfBasetweetIdsToHighlight){
         var idToHightlight = listOfBasetweetIdsToHighlight[i]
-        console.log(idToHightlight)
+ 
         $("#"+idToHightlight).addClass("beingEdited")
-        console.log($("#"+idToHightlight))
+
     }    
 }
 
@@ -421,7 +423,7 @@ function highlightBaseTweets(listOfBasetweetIdsToHighlight){
 function getChatConversation() {
    ajax("getComments", {}, function(returnData) {
        var commentsObject = JSON.parse(returnData)["conversation"];
-       console.log(commentsObject);
+
        updateChatConversation(commentsObject);
    });
 }
@@ -429,7 +431,7 @@ function getChatConversation() {
 function pushChatConversation(newChatText) {
    ajax("pushComments", {"comment":newChatText}, function(returnData) {
       var commentsObject = JSON.parse(returnData)["conversation"];
-      console.log(commentsObject);
+
       updateChatConversation(commentsObject);
    });
 }
@@ -454,11 +456,14 @@ function updateChatConversation(commentsArray) {
 //////////////////////////////////////////
 // completion update helpers
 //////////////////////////////////////////
-//var int=self.setInterval(function(){checkForUpdates()},1000);
+var int=self.setInterval(function(){checkForUpdates()},1000);
 function checkForUpdates(){
 	ajax("getUpdates",{"completionConditionHashtags": getCompletionConditionHashtags()}, function(returnData) {
 		var count = JSON.parse(returnData)["newTweetCount"]
-		updateNewTweetCount(count);
+		var newTweetCreators = JSON.parse(returnData)["newTweetCreators"]
+		
+		
+        colorNewTweetsInTheFeedAndUpdateNewTweetCount(newTweetCreators);
         
         var completionDataObjects = JSON.parse(returnData)["completionDataObjects"]
         var likes = JSON.parse(returnData)["likes"]
@@ -493,6 +498,11 @@ function updateNewTweetCount(count){
 		$("#homeButton").attr('src','http://homes.cs.washington.edu/~felicia0/images/twitify/homebuttonNewMessages5.png');
 		$("#counter").text(count);
 	}
+	else{
+		$("#countPlaceholder").empty();
+		$("#homeButton").attr('src','http://homes.cs.washington.edu/~felicia0/images/twitify/homebutton.png');
+		$("#counter").text("");
+	}
 }
 
 
@@ -505,14 +515,6 @@ function outputHierarchy(outputButton){
 
 
 function createOutput (hashtagSummary,twitterFeed) {
-
-	var test = "#cow: always gives milk/";
-	
-	var testRE = test.match("#cow:(.*)/");
-	console.log("COOOOOOOOOOOOW")
-	console.log(testRE[1]);
-
-
 
   var userName = getUserName()
   var newPage = "<html><head><title>"
@@ -552,7 +554,7 @@ function outputHashtagSummary(hashtagSummary,twitterFeed){
         var counts = hashtagSummaryItem["hashtag"]["counts"]
         
         tweetIdsWithHashTags.push.apply(tweetIdsWithHashTags,memberTweetIds)
-        console.log(tweetIdsWithHashTags);
+
         var ul=$("<ul>")
         ul.css('list-style-type','none');
         hashtagDiv = createHashtagli(hashtag, counts)
@@ -569,9 +571,7 @@ function outputHashtagSummary(hashtagSummary,twitterFeed){
     });
     
     var uncategorizedTweetIds = baseTweetIds.filter(function(i) {return !(tweetIdsWithHashTags.indexOf(i) > -1);});
-    console.log("uncategorizedTweetIds")
-    console.log(uncategorizedTweetIds);
-       
+  
     var ul=$("<ul>")
     var li =$("<li>")
     li.text("Uncategorized");
@@ -580,17 +580,17 @@ function outputHashtagSummary(hashtagSummary,twitterFeed){
     ul.css('margin-left',"30px")
     for(uncat in uncategorizedTweetIds){
 	    tweetId = uncategorizedTweetIds[uncat]
-	    console.log(tweetId)
+
 	    var imageHtml=$("<li>");
 	    var html = filterArray(twitterFeed, function(x){return x["basetweet"]["id"]==tweetId})[0]["basetweet"]["html"]
-	    console.log(html)
+	  
 	    imageHtml.css('width',"200px")
 	    imageHtml.css('display','inline-block')
         imageHtml.append(html)
         ul.append(imageHtml);
     }
     newPageDiv.append(ul);
-    console.log(ul);
+
    return newPageDiv.html();
 }
 
@@ -599,8 +599,7 @@ function getImagesInHashtagAsHtml(hashtag,indent, hashtagSummary,twitterFeed,has
 	var imageHtml=$("<li>");
 	var tweetIds = getListOfTweetIdsForHashtag(hashtagSummary,hashtag);
 	var filteredTweets = filterArray(twitterFeed, function(x){ return tweetIds.indexOf(x["basetweet"]["id"])>-1})
-	console.log(filteredTweets)
-	
+
 	var imagesDivUL=$("<ul>")
 	imagesDivUL.css('list-style-type','none');
 	imagesDivUL.css('margin-left',indent*30+"px")
@@ -636,8 +635,8 @@ function getListOfHashTagsForBaseTweet(baseTweetId,allHashTags){
 
 function getHashtagSummaryForBaseTweet(baseTweetId,allHashTags){
 	//{"hashtag": hashtag, "counts":counts, "memberTweetIds": baseTweets}
-	console.log(allHashTags);
-	var filteredArray= filterArray(allHashTags, function(x){ console.log(x["memberTweetIds"]); return (x["memberTweetIds"]).indexOf(baseTweetId)>-1})
+
+	var filteredArray= filterArray(allHashTags, function(x){ return (x["memberTweetIds"]).indexOf(baseTweetId)>-1})
     return filteredArray;
     
 }

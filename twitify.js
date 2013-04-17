@@ -132,7 +132,7 @@ function initializeAllData(){
     instantiateUsers()
     instantiateRequiredHashtags()
     instantiateConversation()
-    //console.log(getListOfHashTagsForBaseTweet('uist0'))
+
     //instantiateCompletionCondition()
 	
 	
@@ -191,8 +191,7 @@ function isConditionTrue(num1,attr1,attr1Object,num2,attr2){
 
 function getListOfHashTagsForBaseTweet(baseTweetId){
 	var hts = getHashtagSummaryForBaseTweet(baseTweetId)
-	//console.log("HTS");
-	//console.log(hts)
+
 	var hashTags = utils.mapArray(hts, function(x){return x["hashtag"]})
 	return hashTags
 }
@@ -200,7 +199,7 @@ function getListOfHashTagsForBaseTweet(baseTweetId){
 function getHashtagSummaryForBaseTweet(baseTweetId){
 	//{"hashtag": hashtag, "counts":counts, "memberTweetIds": baseTweets}
 	var allHashTags = getHashtagSummary()
-	var filteredArray= utils.filterArray(allHashTags, function(x){ console.log(x["memberTweetIds"]); return (x["memberTweetIds"]).indexOf(baseTweetId)>-1})
+	var filteredArray= utils.filterArray(allHashTags, function(x){ return (x["memberTweetIds"]).indexOf(baseTweetId)>-1})
     
     return filteredArray;
     
@@ -241,8 +240,7 @@ function instantiateConversation() {
 		}
 
 	]
-	//console.log("******************************************************")
-	//console.log(allData["conversation"]);
+
 }
 
 function instantiateUsers(){
@@ -312,6 +310,17 @@ app.post('/home.html', function(request, response){
         var returnDiscussionObjects = getDiscussionHierarchy(baseTweetId);        
         response.send(JSON.stringify({"baseTweetId": baseTweetId, "discussionHierarchy" : returnDiscussionObjects, "hashtagSummary": getHashtagSummary(),"likes":allData["likes"]}))	
 
+    }
+    else if(command == "getBaseTweetIds"){
+    	tweetIds = args['tweetIds']
+    	baseTweetIds = [];
+    	for( twt in tweetIds){
+	    	tweetId = tweetIds[twt];
+	    	baseTweetId = getBaseTweet(tweetId);
+	    	baseTweetIds.push(baseTweetId)
+    	}
+    
+    	response.send(JSON.stringify({ "baseTweetIds" : baseTweetIds,"tweets":allData["tweets"],"lastRefreshTime":request.session.lastRefresh}));
     }else if (command == "saveTweet"){    
     	//{"parentTweetId" : parentTweetId, "replyText":replyText,"username":username}      	
 	    parentTweetId=args["parentTweetId"]
@@ -351,17 +360,14 @@ app.post('/home.html', function(request, response){
         var time = getTime();
         
         possibleDuplicates = utils.filterArray(allData["likes"], function(x){return (x["id"]==tweetId && x["username"]==username)})
-        console.log("DUPLICATES" + possibleDuplicates);
         
         if(possibleDuplicates.length == 0 ){
 	        allData["likes"].push(createNewLikesObject(tweetId,username,time));
         }
         else{
-        	console.log("ALL DATA BEFORE");
-        	console.log(allData["likes"])
+
 	        allData["likes"]=utils.filterArray(allData["likes"], function(x){return( x["id"]!=tweetId && x["username"]!=username)});
-	        console.log("ALL DATA After");
-	        console.log(allData["likes"])
+
         }
                 
         response.send("")
@@ -398,9 +404,10 @@ app.post('/home.html', function(request, response){
 		
 		var newLikeIds=getNewLikes(username,request.session.lastRefresh,utils.dictToArray(allData["tweets"]));
 		
-		request.session.lastRefresh=getTime()
+		var currentTime = getTime()
+		request.session.lastRefresh = currentTime;
 		
-    	response.send(JSON.stringify({"twitterFeed" : allBaseTweetAndDiscussionObjectsSORTED, "hashtagSummary": getHashtagSummary(),"newTweetCreators":creators,"newLikeIds":newLikeIds,"requiredHashtags":allData["requiredHashtags"],"likes":allData["likes"]}))
+    	response.send(JSON.stringify({"twitterFeed" : allBaseTweetAndDiscussionObjectsSORTED, "hashtagSummary": getHashtagSummary(),"newTweetCreators":creators,"newLikeIds":newLikeIds,"requiredHashtags":allData["requiredHashtags"],"likes":allData["likes"], "lastRefreshTime": currentTime}))
 			
 	}else if(command =="getUpdates"){
 		var username= args["username"]
@@ -410,6 +417,7 @@ app.post('/home.html', function(request, response){
 		var newTweets=getNewTweetCount(username,request.session.lastRefresh,utils.dictToArray(allData["tweets"]));
 
 		var count=newTweets["count"];
+		var creators=newTweets["newTweetCreators"]
         var newLikeIds=getNewLikes(username,request.session.lastRefresh,utils.dictToArray(allData["tweets"]));
         
         var completionDataIds = getCompletionData(completionConditionHashtags, allData["tweets"])
@@ -421,7 +429,7 @@ app.post('/home.html', function(request, response){
 		//var matchingTweetIdsSORTED = sortBaseTweetAndDiscussionObjects(matchingTweetObjects, "default")
         //var matchingTweetAndDiscussionObjectsSORTED = getBaseTweetAndDiscussionObjects(matchingTweetIdsSORTED); 
 		
-        response.send(JSON.stringify({"newTweetCount":count, "newLikeIds":newLikeIds,"completionDataObjects":completionDataObjects,"likes":allData["likes"]}))
+        response.send(JSON.stringify({"newTweetCount":count,"newTweetCreators":creators, "newLikeIds":newLikeIds,"completionDataObjects":completionDataObjects,"likes":allData["likes"]}))
 
 		
 	}else if (command == "getRequiredHashtagValues"){
@@ -436,9 +444,7 @@ app.post('/home.html', function(request, response){
 	}else if (command == "SignIn"){
     	
     	var newUsername=args["username"];
-    	console.log("***************************");
-    	console.log("newUserName "+newUsername)
-    	console.log("***************************");
+
         initSession(request, newUsername)
         
     	//User already exists
@@ -497,14 +503,14 @@ app.post('/home.html', function(request, response){
         
 	}else if (command == "getLocations") {
         var currentLocations = allData["currentLocations"]
-        console.log(currentLocations)
+
 	    response.send(JSON.stringify({"locations": currentLocations}))
 	}else if (command == "updateLocation") {
         
 		var username = args["username"]
         var itemId = args["id"]
         updateUserLocation(username, itemId)
-        //console.log("user: "+username+" itemId: "+itemId)
+
         //var currentLocations = allData["currentLocations"]
 	    //response.send(JSON.stringify({"locations": currentLocations}))
         response.send("")
@@ -683,8 +689,7 @@ function getNewTweetCount(user,lastRefresh,tweetObjectArray){
 		timeStamp=tweet["time"];
 		tweetCreator=tweet["creator"]
 		if(timeStamp>lastRefresh && user!=tweetCreator){
-			console.log("USER"+user)
-			console.log("TWEET CREATOR"+tweetCreator)
+
 			counter++;
 			creators.push(tweet["id"]);
 		}
@@ -695,8 +700,7 @@ function getNewTweetCount(user,lastRefresh,tweetObjectArray){
 		tweetCreator=tweet["username"]
 		
 		if(timeStamp>lastRefresh && user!=tweetCreator){
-			console.log("USER"+user)
-			console.log("TWEET CREATOR"+tweetCreator)
+
 			counter++;
 		}
 	}
@@ -713,8 +717,7 @@ function getNewLikes(user,lastRefresh,tweetObjectArray){
 		tweetCreator=tweet["username"]
 		
 		if(timeStamp>lastRefresh && user!=tweetCreator){
-			console.log("USER"+user)
-			console.log("TWEET CREATOR"+tweetCreator)
+
 			counter++;
 			likeIds.push(tweet["id"]);
 		}
@@ -724,9 +727,8 @@ function getNewLikes(user,lastRefresh,tweetObjectArray){
 }
 
 function initSession(request, theUser){
-	console.log(theUser)
+
     request.session.user = theUser
-    console.log(request.session.user)
     request.session.lastRefresh=getTime();
     request.session.numberToDisplay = numberOfTweetsToDisplayIncrementSize
     request.session.query = ""
@@ -747,7 +749,7 @@ function getRequiredHashtagValues(baseTweetId){
 	var baseTweetId = allData["tweets"][baseTweetId]["id"]
 	var tweetText = allData["tweets"][baseTweetId]["html"]
 	var hashtags = tweetText.match(/\S*#(?:\[[^\]]+\]|\S+)/gi)
-	console.log(hashtags);
+
 	
 
     var discussionRoot=getDiscussionHierarchy(baseTweetId)[0]
@@ -766,7 +768,7 @@ function getRequiredHashtagValues(baseTweetId){
 		for(h in hashtags){
 			hashtag = hashtags[h].toLowerCase()
 			if(hashtag[hashtag.length-1]==":"){
-				console.log(hashtag)
+
 				hashtag=hashtag.slice(0,-1)
 				var value = tweetText.match(hashtag+': \"(.*)\"');
 				
@@ -803,9 +805,6 @@ function getRequiredHashtagValues(baseTweetId){
 
 	}
 
-	console.log("VALUES")
-	console.log(values)
-	
     return values;
 
 }
@@ -835,7 +834,7 @@ function getHashtagSummary(){
         var hashtags = tweetText.match(/\S*#(?:\[[^\]]+\]|\S+)/gi)
         for (h in hashtags){
             hashtag = hashtags[h].toLowerCase()
-            //console.log(hashtag)
+
             if(hashtagCounts[hashtag] === undefined){
                 hashtagCounts[hashtag] = [baseTweet]
             }else{
@@ -889,11 +888,8 @@ function containsHashtag(biggerHashtag, smallerHashtag){
     var biggerHashtagElements = biggerHashtag["memberTweetIds"]
     var smallerHashtagElements = smallerHashtag["memberTweetIds"]
     
-    console.log(biggerHashtagElements)
-    
     for(i in smallerHashtagElements){
         var hashtagElement = smallerHashtagElements[i]
-        console.log(hashtagElement)
         if ( !utils.arrayContains(biggerHashtagElements, hashtagElement)){
             return false
         }
@@ -1089,20 +1085,18 @@ function getMostDiscussedByMe(discussionObj,username){
         }
 		//times.push(child["tweetObject"]["time"])
 	}
-    //console.log("queue")
-	//console.log(queue)
+
 	while (queue.length>0){
 		t=queue.shift();
-        //console.log(t["tweet"]["children"])
+
 		var children = t["tweet"]["children"]
 		for(c in children){
             
             child = children[c]
-            //console.log("child")
-            //console.log(child)
+
 			queue.unshift({"tweet":child})
             if(child["tweetObject"]["creator"] == username){
-                console.log(child["tweetObject"])
+
                 countNumberOfDiscussions ++
             }
 			//times.push(child["tweetObject"]["time"])
@@ -1182,15 +1176,14 @@ function getTimesOfAllComments(discussion){
 			q.unshift({"tweet":children[c],"level":level})
 		}
 	}
-	//console.log("get leaf times");
-	//console.log(times);
+
 	return times;
 }
 
 function getTimeStampOfMostRecentComment(discussions,tweetId){
 	var commentTimes=getTimesOfAllComments(discussions);
 	commentTimes.sort(function(a,b){return b - a}) //Array now becomes [41, 25, 8, 71]
-	//console.log("largest "+ commentTimes[0]);
+
 	if( commentTimes[0]==undefined){
 		return allData["tweets"][tweetId]["time"];
 	} 
