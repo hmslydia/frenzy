@@ -1,13 +1,18 @@
 function twitterFeedSetup(){
-	ajax("getTwitterFeed", {}, function(returnData) { 
-		console.log("LIKES");
-		console.log(JSON.parse(returnData)["likes"])
-		displayFeed(JSON.parse(returnData)["twitterFeed"],JSON.parse(returnData)["likes"]);
-		displayHashtagSummary(JSON.parse(returnData)["hashtagSummary"])
+	ajax("getTwitterFeed", {}, function(returnData) {         
+        var likes = JSON.parse(returnData)["likes"]
+        var twitterFeed = JSON.parse(returnData)["twitterFeed"]
+        var hashtagSummary = JSON.parse(returnData)["hashtagSummary"]
+        var newTweetCreators = JSON.parse(returnData)["newTweetCreators"]
+        var newLikeIds = JSON.parse(returnData)["newLikeIds"]
+        var requiredHashtags = JSON.parse(returnData)["requiredHashtags"]
+        
+		displayFeed(twitterFeed,likes);
+		displayHashtagSummary(hashtagSummary)
 		//displayComposeTweet(getUserName())
-		colorNewTweets(JSON.parse(returnData)["newTweetCreators"]);
-		colorNewLikes(JSON.parse(returnData)["newLikeIds"])
-		setRequiredHashtags(JSON.parse(returnData)["requiredHashtags"])
+		colorNewTweets(newTweetCreators);
+		colorNewLikes(newLikeIds)
+		setRequiredHashtags(requiredHashtags)
 	});
 	checkForUpdates()
 }
@@ -88,7 +93,10 @@ function displayConditionsUpdate(matchingBaseTweetObjects, nonMatchingBaseTweetO
 }
 
 function displayFeed(twitterFeed,likes){
-	//displayConditionsUpdate([],[])
+	console.log("twitterFeed")
+    console.log(twitterFeed)
+    
+    //displayConditionsUpdate([],[])
 	$("#twitterFeed").empty()	
 	
 	
@@ -249,6 +257,9 @@ function createTweetAndDiscussionDiv(tweetObj, discussionObj,likes){
 }
 
 function createTweetDiv(tweetObj){
+    console.log("tweetObj")
+    console.log(tweetObj)
+    
     tweetHTML = tweetObj["html"]
     tweetId= tweetObj["id"]
     tweetCreator = tweetObj["creator"]
@@ -264,7 +275,7 @@ function createTweetDiv(tweetObj){
     
     
     var re = new RegExp(/\S*#(?:\[[^\]]+\]|\S+)/gi); 
-	tweetHTML = tweetHTML.replace(re, "<span class='user' onclick = 'myfunction(\"$&\")' >$&</span>");
+	tweetHTML = tweetHTML.replace(re, "<span class='user' onclick = 'search(\"$&\")' >$&</span>");
                 
     tweetHTMLSpan.html(tweetHTML)
     div.append(tweetHTMLSpan)
@@ -286,12 +297,11 @@ function createTweetDiv(tweetObj){
     
     return div
 }
-
+/*
 function myfunction(str){
-    //alert(str)
     search(str)
 }
-
+*/
 function colorNewTweets(newDiscussionCreators){
 	for(c in newDiscussionCreators){
 			creator=newDiscussionCreators[c];

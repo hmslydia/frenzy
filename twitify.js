@@ -227,6 +227,7 @@ function instantiateStreams(){
 
 function instantiateConversation() {
 	allData["conversation"] = [
+    /*
 		{	"user":"hmslydia",
 			"comment":"Hello World!",
 			"time": getTime()
@@ -239,10 +240,9 @@ function instantiateConversation() {
 			"comment":"Poooooop",
 			"time": getTime()
 		}
-
+*/
 	]
-	//console.log("******************************************************")
-	//console.log(allData["conversation"]);
+
 }
 
 function instantiateUsers(){
@@ -454,8 +454,7 @@ app.post('/home.html', function(request, response){
     	
     	response.send("")
 			
-	}else if (command == "searchTweets"){ 
-        
+	}else if (command == "searchTweets"){         
         var username = request.session.user
         var searchQuery = args["searchQuery"]     
         var sortBy = args["sortBy"]
@@ -474,13 +473,17 @@ app.post('/home.html', function(request, response){
     	//var returnTweetIds = getSearchTweetOrder(returnTweetObjects);    	
     	//returnTweetObjects = getBaseTweetAndDiscussionObjects(returnTweetIds)     
         
-        response.send(JSON.stringify({"twitterFeed" : matchingTweetAndDiscussionObjectsSORTED, "searchTermArray": searchTermArray, "hashtagSummary": getHashtagSummary(),"likes":allData["likes"]}))
+        response.send(JSON.stringify({"twitterFeed" : matchingTweetAndDiscussionObjectsSORTED, "searchTermArray": searchTermArray, "hashtagSummary": getHashtagSummary(), "likes":allData["likes"] }))
         
 	}else if (command == "searchUsersTweets"){
         var user = args["user"]
         tweetsArray = utils.dictToArray(allData["tweets"])
         var userTweetObjects = utils.filterArray(tweetsArray, function(x){return x["creator"]==user})
-    	response.send(JSON.stringify({"twitterFeed" : userTweetObjects}))
+        var userTweetIds = utils.mapArray(userTweetObjects, function(x){return x["id"]})
+        
+        var userTweetObjects = getBaseTweetAndDiscussionObjects(userTweetIds);
+        
+    	response.send(JSON.stringify({"twitterFeed" : userTweetObjects, "likes":allData["likes"]}))
         
 	}else if(command == "pushComments") {
        	var comment = args["comment"]
