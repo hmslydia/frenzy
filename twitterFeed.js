@@ -261,7 +261,7 @@ function createTweetDiv(tweetObj){
     var tweetCreator = tweetObj["creator"]
 
     
-    clickableDiv = $("<a id='clickable-"+tweetId+"' href='#' >");
+    clickableDiv = $("<a id='clickable-"+tweetId+"'>");
     div = $("<div class='span4 basetweet' id= '"+tweetId+"'>")
     
     tweetCreatorSpan = $("<span class='user'>")
