@@ -500,7 +500,7 @@ app.post('/home.html', function(request, response){
         
 	}else if (command == "getLocations") {
         var currentLocations = allData["currentLocations"]
-        console.log(currentLocations)
+        //console.log(currentLocations)
 	    response.send(JSON.stringify({"locations": currentLocations}))
 	}else if (command == "updateLocation") {
         
@@ -838,7 +838,6 @@ function getHashtagSummary(){
         var hashtags = tweetText.match(/\S*#(?:\[[^\]]+\]|\S+)/gi)
         for (h in hashtags){
             hashtag = hashtags[h].toLowerCase()
-            //console.log(hashtag)
             if(hashtagCounts[hashtag] === undefined){
                 hashtagCounts[hashtag] = [baseTweet]
             }else{
@@ -846,11 +845,8 @@ function getHashtagSummary(){
                     hashtagCounts[hashtag].push(baseTweet)
                 }
             }
-
-            //hashtagCounts[hashtag] = hashtagCounts[hashtag] != undefined ? hashtagCounts[hashtag]+1 : 1;
         }
     }
-
     
     hashtagCountsArray = []
     for( hashtag in hashtagCounts){
@@ -858,35 +854,12 @@ function getHashtagSummary(){
         var counts = baseTweets.length
         hashtagCountsArray.push({"hashtag": hashtag, "counts":counts, "memberTweetIds": baseTweets})
     }
-
-    var hashtagHierarchy = makeHashtagHierarchy(hashtagCountsArray)
-    
     
     hashtagCountsArray.sort(function(a,b){return b["counts"]-a["counts"]});
 
     return hashtagCountsArray
     
 }
-
-function makeHashtagHierarchy(hashtagCountsArray){
-    var sortedHashtagArray = hashtagCountsArray.sort(function(a,b){return b["counts"]-a["counts"]});
-    
-    biggestHashtag = sortedHashtagArray[0]
-    containedHashtags = []
-    nonContainedHashtags = []
-    
-    for(var i = 1; i< sortedHashtagArray.length; i++){
-        var hashtagObject = sortedHashtagArray[i]
-        if( containsHashtag(biggestHashtag, hashtagObject) ){
-            
-            containedHashtags.push(hashtagObject)
-        }else{
-            nonContainedHashtags.push(hashtagObject)
-        }      
-    }    
-}
-
-
 
 function containsHashtag(biggerHashtag, smallerHashtag){
     var biggerHashtagElements = biggerHashtag["memberTweetIds"]
@@ -1321,7 +1294,7 @@ function restoreData(timestamp){
 				var newResults = JSON.parse(restoredData);
 
 				// see whether this actually changed anything
-				var currentResultsJSON = JSON.stringify(results);
+				var currentResultsJSON = JSON.stringify(allData);
 				var newResultsJSON = JSON.stringify(newResults);
 				var message = "restored " + timestamp +
 					" which " +
@@ -1334,7 +1307,7 @@ function restoreData(timestamp){
 				//checkpoint();
 				
 				// now replace the results variable
-				results = newResults;
+				allData = newResults;
 				
 				//response.send(message)
 			}
@@ -1347,4 +1320,4 @@ function restoreData(timestamp){
 
 app.listen(3000);
 console.log('Listening on port 3000');
-//restoreData(1)
+restoreData(1)

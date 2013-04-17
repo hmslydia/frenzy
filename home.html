@@ -390,7 +390,6 @@ var userLocationUpdateTimer = setInterval(function(){updateUserLocations()}, 500
 function updateUserLocations(){
     ajax("getLocations", {}, function(returnData) {
        var locations = JSON.parse(returnData)["locations"];
-console.log(locations)       
        var username = getUserName()
        var idsInUse = filterArray(locations, function(x){return x["user"] != username})
        var idsInUse = map(idsInUse, function(x){return x["id"]})       
@@ -407,9 +406,9 @@ function highlightBaseTweets(listOfBasetweetIdsToHighlight){
     //highlight the ones we being discussed
     for(i in listOfBasetweetIdsToHighlight){
         var idToHightlight = listOfBasetweetIdsToHighlight[i]
-        console.log(idToHightlight)
+        //console.log(idToHightlight)
         $("#"+idToHightlight).addClass("beingEdited")
-        console.log($("#"+idToHightlight))
+        //console.log($("#"+idToHightlight))
     }    
 }
 

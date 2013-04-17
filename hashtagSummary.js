@@ -2,8 +2,8 @@ var answer = []
 
 
 function displayHashtagSummary(hashtagSummary){
-    //console.log("hashtagSummary")
-    //console.log(hashtagSummary)
+    console.log("hashtagSummary")
+    console.log(hashtagSummary)
     $("#hashtagSummary").empty()
 
     answer = []
@@ -19,6 +19,7 @@ function displayHashtagSummary(hashtagSummary){
 
     for(i in answer){
         var hashtagSummaryItem = answer[i]
+        console.log(hashtagSummaryItem)
         var hashtag = hashtagSummaryItem["hashtag"]["hashtag"]
         var indents = hashtagSummaryItem["parents"].length
         var counts = hashtagSummaryItem["hashtag"]["memberTweetIds"].length
@@ -61,16 +62,21 @@ function orderAndEnchild(hashtagArray, allHTags){
     for( i in sortedHashtagArray ){
         var hashtagObj = sortedHashtagArray[i]
         queue.push(hashtagObj)
+        console.log("hashtagObj")
+        console.log(hashtagObj["hashtag"])
     }
     
     while( queue.length > 0 ){
         var largestHashtag = queue[0]
         var largestHashtagId = largestHashtag["hashtag"]["hashtag"]
         answer.push(largestHashtag)
-        
+        console.log("LARGEST HASHTAG")
+        console.log(largestHashtag["hashtag"])
         //remove largestHashtag from the array
         var index = queue.indexOf(largestHashtag);
-        queue.splice(index, 1);
+        var eltToSplice = queue.splice(index, 1)
+        console.log("splice")
+        console.log(eltToSplice[0]["hashtag"]["hashtag"]);
         
         var lookForChildrenHashtags = []
         
@@ -86,11 +92,17 @@ function orderAndEnchild(hashtagArray, allHTags){
         //remove them from the queue
         for( i in childrenOflargestHashtag){
             var elt = childrenOflargestHashtag[i]
-            //remove elts from queu
+            //remove elts from queue
             var index = queue.indexOf(elt);
-            queue.splice(index, 1);
+            if(index > -1){
+                var eltToSplice2 = queue.splice(index, 1);
+                //Note: we only want to remove it from the queue if it isn't already been removed (this happens when you have 
+                //a hashtag that is the child of two parents.  The first time it gets enchilded, it is removed, the second time
+                //it is enchilded, you can't remove it (it isn't in the queue anymore)
+            }
         }
-        
+        console.log("childrenOflargestHashtag")
+        console.log(childrenOflargestHashtag)
         //operate on all children
         //CHANGE THEIR PARENTAGE - I NEED COPIES
         //add parents to the children AND recurse into them
