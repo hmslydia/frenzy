@@ -226,6 +226,7 @@ function instantiateStreams(){
 
 function instantiateConversation() {
 	allData["conversation"] = [
+    /*
 		{	"user":"hmslydia",
 			"comment":"Hello World!",
 			"time": getTime()
@@ -238,7 +239,7 @@ function instantiateConversation() {
 			"comment":"Poooooop",
 			"time": getTime()
 		}
-
+*/
 	]
 
 }
@@ -460,8 +461,7 @@ app.post('/home.html', function(request, response){
     	
     	response.send("")
 			
-	}else if (command == "searchTweets"){ 
-        
+	}else if (command == "searchTweets"){         
         var username = request.session.user
         var searchQuery = args["searchQuery"]     
         var sortBy = args["sortBy"]
@@ -480,13 +480,17 @@ app.post('/home.html', function(request, response){
     	//var returnTweetIds = getSearchTweetOrder(returnTweetObjects);    	
     	//returnTweetObjects = getBaseTweetAndDiscussionObjects(returnTweetIds)     
         
-        response.send(JSON.stringify({"twitterFeed" : matchingTweetAndDiscussionObjectsSORTED, "searchTermArray": searchTermArray, "hashtagSummary": getHashtagSummary(),"likes":allData["likes"]}))
+        response.send(JSON.stringify({"twitterFeed" : matchingTweetAndDiscussionObjectsSORTED, "searchTermArray": searchTermArray, "hashtagSummary": getHashtagSummary(), "likes":allData["likes"] }))
         
 	}else if (command == "searchUsersTweets"){
         var user = args["user"]
         tweetsArray = utils.dictToArray(allData["tweets"])
         var userTweetObjects = utils.filterArray(tweetsArray, function(x){return x["creator"]==user})
-    	response.send(JSON.stringify({"twitterFeed" : userTweetObjects}))
+        var userTweetIds = utils.mapArray(userTweetObjects, function(x){return x["id"]})
+        
+        var userTweetObjects = getBaseTweetAndDiscussionObjects(userTweetIds);
+        
+    	response.send(JSON.stringify({"twitterFeed" : userTweetObjects, "likes":allData["likes"]}))
         
 	}else if(command == "pushComments") {
        	var comment = args["comment"]
@@ -503,8 +507,7 @@ app.post('/home.html', function(request, response){
         
 	}else if (command == "getLocations") {
         var currentLocations = allData["currentLocations"]
-
-	    response.send(JSON.stringify({"locations": currentLocations}))
+  	    response.send(JSON.stringify({"locations": currentLocations}))
 	}else if (command == "updateLocation") {
         
 		var username = args["username"]
@@ -842,11 +845,8 @@ function getHashtagSummary(){
                     hashtagCounts[hashtag].push(baseTweet)
                 }
             }
-
-            //hashtagCounts[hashtag] = hashtagCounts[hashtag] != undefined ? hashtagCounts[hashtag]+1 : 1;
         }
     }
-
     
     hashtagCountsArray = []
     for( hashtag in hashtagCounts){
@@ -854,35 +854,12 @@ function getHashtagSummary(){
         var counts = baseTweets.length
         hashtagCountsArray.push({"hashtag": hashtag, "counts":counts, "memberTweetIds": baseTweets})
     }
-
-    var hashtagHierarchy = makeHashtagHierarchy(hashtagCountsArray)
-    
     
     hashtagCountsArray.sort(function(a,b){return b["counts"]-a["counts"]});
 
     return hashtagCountsArray
     
 }
-
-function makeHashtagHierarchy(hashtagCountsArray){
-    var sortedHashtagArray = hashtagCountsArray.sort(function(a,b){return b["counts"]-a["counts"]});
-    
-    biggestHashtag = sortedHashtagArray[0]
-    containedHashtags = []
-    nonContainedHashtags = []
-    
-    for(var i = 1; i< sortedHashtagArray.length; i++){
-        var hashtagObject = sortedHashtagArray[i]
-        if( containsHashtag(biggestHashtag, hashtagObject) ){
-            
-            containedHashtags.push(hashtagObject)
-        }else{
-            nonContainedHashtags.push(hashtagObject)
-        }      
-    }    
-}
-
-
 
 function containsHashtag(biggerHashtag, smallerHashtag){
     var biggerHashtagElements = biggerHashtag["memberTweetIds"]
@@ -1311,7 +1288,7 @@ function restoreData(timestamp){
 				var newResults = JSON.parse(restoredData);
 
 				// see whether this actually changed anything
-				var currentResultsJSON = JSON.stringify(results);
+				var currentResultsJSON = JSON.stringify(allData);
 				var newResultsJSON = JSON.stringify(newResults);
 				var message = "restored " + timestamp +
 					" which " +
@@ -1324,7 +1301,7 @@ function restoreData(timestamp){
 				//checkpoint();
 				
 				// now replace the results variable
-				results = newResults;
+				allData = newResults;
 				
 				//response.send(message)
 			}
@@ -1337,4 +1314,4 @@ function restoreData(timestamp){
 
 app.listen(3000);
 console.log('Listening on port 3000');
-//restoreData(1)
+restoreData(1)

@@ -294,7 +294,7 @@ function getUserName(){
 }
 
 function ajax(command, result, cb) {    
-    console.log("ajax command: "+command);
+    //console.log("ajax command: "+command);
     //console.log(result)
 	result["username"] = getUserName()
 	$.post(document.location.href, { "command" : command, args : JSON.stringify(result) }, cb)
@@ -392,7 +392,7 @@ var userLocationUpdateTimer = setInterval(function(){updateUserLocations()}, 500
 function updateUserLocations(){
     ajax("getLocations", {}, function(returnData) {
        var locations = JSON.parse(returnData)["locations"];
-   
+
        var username = getUserName()
        var idsInUse = filterArray(locations, function(x){return x["user"] != username})
        var idsInUse = map(idsInUse, function(x){return x["id"]})       
@@ -418,7 +418,7 @@ function highlightBaseTweets(listOfBasetweetIdsToHighlight){
 //////////////////////////////////////////
 // chat helpers
 //////////////////////////////////////////
-//var timer = setInterval(function(){getChatConversation()}, 5000);
+var timer = setInterval(function(){getChatConversation()}, 1000);
 
 function getChatConversation() {
    ajax("getComments", {}, function(returnData) {
@@ -438,19 +438,19 @@ function pushChatConversation(newChatText) {
 
 function updateChatConversation(commentsArray) {
    //$("#chatLog").html("");
-   for(var i = 0; i < commentsArray.length; i++) {
-      var p = $("<p>");
-      if(commentsArray[i]["user"] == "") {
+    for(var i = 0; i < commentsArray.length; i++) {
+        var p = $("<p>");
+        if(commentsArray[i]["user"] == "") {
         commentsArray[i]["user"] = "Guest";
-      }
-      var userComment = "<b>" + commentsArray[i]["user"] + "</b>: " + commentsArray[i]["comment"];
-      p.html(userComment);
-      $("#chatLog").append(p);
-   }
-   $("#chatLog").animate({ scrollTop: $("#chatLog").attr("scrollHeight") }, 2000); 
-   if(!timer) {
-    timer = setInterval(function(){getChatConversation()}, 5000);
-   }
+        }
+        var userComment = "<b>" + commentsArray[i]["user"] + "</b>: " + commentsArray[i]["comment"];
+        p.html(userComment);
+        $("#chatLog").append(p);
+    }
+    $("#chatLog").animate({ scrollTop: $("#chatLog").attr("scrollHeight") }, 2000); 
+    if(!timer) {
+        timer = setInterval(function(){getChatConversation()}, 5000);
+    }
 }
 
 //////////////////////////////////////////

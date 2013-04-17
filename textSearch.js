@@ -27,12 +27,14 @@ function searchHelper(){
     search(searchQuery, "default");
 }
 function search(searchQuery, sortBy) { 
+    if (sortBy === undefined){
+        sortBy = "default"
+    }
     ajax("searchTweets", {"searchQuery":searchQuery, "sortBy":sortBy}, function(returnData) {
-        
-        
-        
-		var twitterFeed = JSON.parse(returnData)["twitterFeed"]
-		displayFeed(twitterFeed);
+        var twitterFeed = JSON.parse(returnData)["twitterFeed"]
+        var likes = JSON.parse(returnData)["likes"]
+		
+        displayFeed(twitterFeed,likes);
         
         var searchTermArray = JSON.parse(returnData)["searchTermArray"]
         
@@ -50,8 +52,12 @@ function search(searchQuery, sortBy) {
 
 function userSearch(user) {  
     ajax("searchUsersTweets", {"user":user}, function(returnData) {
-        console.log(JSON.parse(returnData))
-		displayFeed(JSON.parse(returnData)["twitterFeed"]);
+    console.log("searchUsersTweets")
+    console.log(returnData)
+        var twitterFeed = JSON.parse(returnData)["twitterFeed"]
+        var likes = JSON.parse(returnData)["likes"]
+		
+        displayFeed(twitterFeed,likes);
 	});
 }
 

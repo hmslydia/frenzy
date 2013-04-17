@@ -1,19 +1,23 @@
 tweetClickUpdateTimes = []
 
 function twitterFeedSetup(){
-	ajax("getTwitterFeed", {}, function(returnData) { 
 
-		var twitterFeed = JSON.parse(returnData)["twitterFeed"]
-		var lastRefreshTime = JSON.parse(returnData)["lastRefreshTime"]
-		resetTweetClickUpdateTimes(twitterFeed,lastRefreshTime);
-		
-		displayFeed(JSON.parse(returnData)["twitterFeed"],JSON.parse(returnData)["likes"]);
-		displayHashtagSummary(JSON.parse(returnData)["hashtagSummary"])
-
-		colorNewTweets(JSON.parse(returnData)["newTweetCreators"]);
-
-		colorNewLikes(JSON.parse(returnData)["newLikeIds"])
-		setRequiredHashtags(JSON.parse(returnData)["requiredHashtags"])
+	ajax("getTwitterFeed", {}, function(returnData) {         
+        var likes = JSON.parse(returnData)["likes"]
+        var twitterFeed = JSON.parse(returnData)["twitterFeed"]
+        var hashtagSummary = JSON.parse(returnData)["hashtagSummary"]
+        var newTweetCreators = JSON.parse(returnData)["newTweetCreators"]
+        var newLikeIds = JSON.parse(returnData)["newLikeIds"]
+        var requiredHashtags = JSON.parse(returnData)["requiredHashtags"]
+        var lastRefreshTime = JSON.parse(returnData)["lastRefreshTime"]
+        
+        resetTweetClickUpdateTimes(twitterFeed,lastRefreshTime);
+		displayFeed(twitterFeed,likes);
+		displayHashtagSummary(hashtagSummary)
+		//displayComposeTweet(getUserName())
+		colorNewTweets(newTweetCreators);
+		colorNewLikes(newLikeIds)
+		setRequiredHashtags(requiredHashtags)
 	});
 	checkForUpdates()
 }
@@ -108,7 +112,10 @@ function displayConditionsUpdate(matchingBaseTweetObjects, nonMatchingBaseTweetO
 }
 
 function displayFeed(twitterFeed,likes){
-	//displayConditionsUpdate([],[])
+	console.log("twitterFeed")
+    console.log(twitterFeed)
+    
+    //displayConditionsUpdate([],[])
 	$("#twitterFeed").empty()	
 	
 	
@@ -248,9 +255,11 @@ function createTweetAndDiscussionDiv(tweetObj, discussionObj,likes){
 }
 
 function createTweetDiv(tweetObj){
+
     var tweetHTML = tweetObj["html"]
     var tweetId= tweetObj["id"]
     var tweetCreator = tweetObj["creator"]
+
     
     clickableDiv = $("<a id='clickable-"+tweetId+"' href='#' >");
     div = $("<div class='span4 basetweet' id= 'tweet-"+tweetId+"'>")
@@ -264,7 +273,7 @@ function createTweetDiv(tweetObj){
     
     
     var re = new RegExp(/\S*#(?:\[[^\]]+\]|\S+)/gi); 
-	tweetHTML = tweetHTML.replace(re, "<span class='user' onclick = 'myfunction(\"$&\")' >$&</span>");
+	tweetHTML = tweetHTML.replace(re, "<span class='user' onclick = 'search(\"$&\")' >$&</span>");
                 
     tweetHTMLSpan.html(tweetHTML)
     div.append(tweetHTMLSpan)
@@ -287,12 +296,6 @@ function createTweetDiv(tweetObj){
     
     clickableDiv.append(div);
     return clickableDiv
-}
-
-
-function myfunction(str){
-    //alert(str)
-    search(str)
 }
 
 function colorNewTweets(newDiscussionCreators){
