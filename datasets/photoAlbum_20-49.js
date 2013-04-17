@@ -7,6 +7,7 @@ completionCondition=[
 	}
 ] 
 
+requiredHashtags=["#"]
 	
 tweets = {
      "nature20": {

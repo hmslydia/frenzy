@@ -23,6 +23,7 @@ function refreshDiscussion(tweetId){
         hashtagSummary = JSON.parse(returnData)["hashtagSummary"]
         baseTweetId = JSON.parse(returnData)["baseTweetId"]
         var likes = JSON.parse(returnData)["likes"]
+        
         updateDiscussionFeed(baseTweetId,discussionHierarchyForThisBaseTweet,likes)        
         displayHashtagSummary(hashtagSummary)
 	});

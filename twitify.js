@@ -73,8 +73,8 @@ allData["history"]["location"] = [
 //require('./datasets/testTweets2');
 //require('./datasets/siggraph')
 //require('./datasets/HCOMP')
-//require('./datasets/pictureTask')
-require('./datasets/testTweets3');
+require('./datasets/photoAlbum_20-49')
+//require('./datasets/testTweets3');
 //require('./saved/caitlin and danielle-hierarchy')
 
 /*FOR USER STUDY*/
@@ -1314,4 +1314,4 @@ function restoreData(timestamp){
 
 app.listen(3000);
 console.log('Listening on port 3000');
-restoreData(1)
+//restoreData(1)
