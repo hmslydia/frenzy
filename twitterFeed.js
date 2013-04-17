@@ -262,7 +262,7 @@ function createTweetDiv(tweetObj){
 
     
     clickableDiv = $("<a id='clickable-"+tweetId+"' href='#' >");
-    div = $("<div class='span4 basetweet' id= 'tweet-"+tweetId+"'>")
+    div = $("<div class='span4 basetweet' id= '"+tweetId+"'>")
     
     tweetCreatorSpan = $("<span class='user'>")
     tweetCreatorSpan.text(tweetCreator)
@@ -281,7 +281,7 @@ function createTweetDiv(tweetObj){
     wrap1 = function(d, twtId){
         d.click(function(){
             refreshDiscussion(twtId)
-            $("#tweet-"+tweetId).removeClass('newDiscussion2');
+            $("#"+tweetId).removeClass('newDiscussion2');
             tweetClickUpdateTimes[twtId]["lastRefreshTime"] = getTime();
         })
     }
@@ -301,7 +301,7 @@ function createTweetDiv(tweetObj){
 function colorNewTweets(newDiscussionCreators){
 	for(c in newDiscussionCreators){
 			creator=newDiscussionCreators[c];
-			$("#tweet-"+creator).addClass("newDiscussion")
+			$("#"+creator).addClass("newDiscussion")
 			//css('background-color', 'pink');
 	}
 }
@@ -316,11 +316,11 @@ function colorNewTweetsInTheFeedAndUpdateNewTweetCount(newDiscussionCreators){
 		for(c in baseTweetIds){
 			creator=baseTweetIds[c];
 			if(tweetClickUpdateTimes[creator]['lastRefreshTime'] < twitterFeed[newDiscussionCreators[c]]['time'] ){
-				$("#tweet-"+creator).addClass("newDiscussion2")
+				$("#"+creator).addClass("newDiscussion2")
 				count++;
 			}
 			else{
-				$("#tweet-"+creator).removeClass('newDiscussion2');
+				$("#"+creator).removeClass('newDiscussion2');
 			}
 		}
 		updateNewTweetCount(count);
@@ -386,7 +386,7 @@ function createDiscussionDiv(tweetObj,level,likes){
     var tweetId= tweetObj["id"]
     var tweetCreator = tweetObj["creator"]
     
-    div = $("<div class='tweet subReplyTextArea' id= 'tweet-"+tweetId+"'>")
+    div = $("<div class='tweet subReplyTextArea' id= '"+tweetId+"'>")
     barDiv = $("<div style='margin-top:25px;'>")
     //indent the tweet based on how deeply threaded it is
 	//multiply by 30 px per level
@@ -507,7 +507,7 @@ function toggleReplyDiv(postPlaceholderDiv,tweetId){
 
 function createBaseReplyDiv(parentTweetId){
 	//discussionDiv = $("#discussionDiv")
-	//commentDiv = $("#tweet-"+parentTweetId)
+	//commentDiv = $("#"+parentTweetId)
 	
     var containerDiv = $("<div class='replyTextDiv'>")
 	var div = $("<textarea class='replyTextArea' id='replyTo-"+parentTweetId+"'>")

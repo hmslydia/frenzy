@@ -391,8 +391,9 @@ var userLocationUpdateTimer = setInterval(function(){updateUserLocations()}, 500
 
 function updateUserLocations(){
     ajax("getLocations", {}, function(returnData) {
+    console.log("getLocations")
        var locations = JSON.parse(returnData)["locations"];
-
+console.log(locations)
        var username = getUserName()
        var idsInUse = filterArray(locations, function(x){return x["user"] != username})
        var idsInUse = map(idsInUse, function(x){return x["id"]})       
@@ -401,6 +402,8 @@ function updateUserLocations(){
 }
 
 function highlightBaseTweets(listOfBasetweetIdsToHighlight){
+console.log("highlight")
+console.log(listOfBasetweetIdsToHighlight)
     //remove all highlights
     $(".basetweet").each(function( index){
         $(this).removeClass("beingEdited")
