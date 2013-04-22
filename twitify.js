@@ -372,7 +372,12 @@ app.post('/home.html', function(request, response){
         var returnDiscussionObjects = getDiscussionHierarchy(baseTweetId);
         
         response.send(JSON.stringify({"baseTweetId": baseTweetId, "discussionHierarchy" : returnDiscussionObjects, "hashtagSummary": getHashtagSummary(),"likes":allData["likes"]}))
-			
+        
+        /*
+        var baseTweetId = getBaseTweet(tweetId);
+        var returnDiscussionObjects = getDiscussionHierarchy(baseTweetId);        
+        response.send(JSON.stringify({"baseTweetId": baseTweetId, "discussionHierarchy" : returnDiscussionObjects, "hashtagSummary": getHashtagSummary(),"likes":allData["likes"]}))
+		*/	
 	}else if (command == "updateLikes"){
         var tweetId=args["tweetId"]
         var username=args["username"]

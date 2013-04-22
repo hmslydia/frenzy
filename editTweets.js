@@ -1,13 +1,26 @@
 function updateTweet(tweetId, newContent){
     ajax("updateTweet", {"tweetId":tweetId, "newContent": newContent}, function(returnData) {
         //bold the term that was searched
-        
+        /*
         discussionHierarchyForThisBaseTweet = JSON.parse(returnData)["discussionHierarchy"]
         hashtagSummary = JSON.parse(returnData)["hashtagSummary"]
         baseTweetId = JSON.parse(returnData)["baseTweetId"]
 
         updateDiscussionFeed(baseTweetId,discussionHierarchyForThisBaseTweet)        
         displayHashtagSummary(hashtagSummary)
+        */
+        var baseTweetId = JSON.parse(returnData)["baseTweetId"]
+        discussionHierarchyForThisBaseTweet = JSON.parse(returnData)["discussionHierarchy"]
+        
+        tweetClickUpdateTimes[baseTweetId]["lastRefreshTime"] = getTime();
+        
+        hashtagSummary = JSON.parse(returnData)["hashtagSummary"]
+        baseTweetId = JSON.parse(returnData)["baseTweetId"]
+        var likes = JSON.parse(returnData)["likes"]
+        
+        updateDiscussionFeed(baseTweetId,discussionHierarchyForThisBaseTweet,likes)        
+        displayHashtagSummary(hashtagSummary)        
+        
 	});
 }
 
@@ -15,10 +28,10 @@ function refreshDiscussion(tweetId){
 
     ajax("getDiscussion", {"tweetId":tweetId}, function(returnData) {
         //bold the term that was searched
-        
+        var baseTweetId = JSON.parse(returnData)["baseTweetId"]
         discussionHierarchyForThisBaseTweet = JSON.parse(returnData)["discussionHierarchy"]
         
-        tweetClickUpdateTimes[tweetId]["lastRefreshTime"] = getTime();
+        tweetClickUpdateTimes[baseTweetId]["lastRefreshTime"] = getTime();
         
         hashtagSummary = JSON.parse(returnData)["hashtagSummary"]
         baseTweetId = JSON.parse(returnData)["baseTweetId"]
