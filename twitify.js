@@ -485,9 +485,9 @@ app.post('/home.html', function(request, response){
         var searchQuery = args["searchQuery"]     
         var sortBy = args["sortBy"]
         var uiElt = args["uiElt"]
-        console.log(uiElt)
+        var notes = args["notes"]
         
-        logSearchQuery(username, searchQuery, sortBy, uiElt)
+        logSearchQuery(username, searchQuery, sortBy, uiElt, notes)
         
         var searchResultsBaseTweetIds = getQueryResultIds(searchQuery, allData["tweets"])
         var matchingTweetIds = searchResultsBaseTweetIds["matchingTweetIds"]
@@ -544,7 +544,8 @@ app.post('/home.html', function(request, response){
 	}else if (command == "logFeedbackClicks") {
         var username = args["username"]
         var uiElt = args["uiElt"]
-        logFeedback(username, uiElt)
+        var notes = args["notes"]
+        logFeedback(username, uiElt, notes)
         response.send("")
 	}       
     
@@ -564,19 +565,19 @@ function getNewConvos(request) {
 function logSignIn(username){
     var eventObj = {"username": username, "time": getTime(), "event": "signIn"}
     allData["history"]["events"].push(eventObj)
-    console.log(allData["history"]["events"])
+    //console.log(allData["history"]["events"])
 }
 
-function logSearchQuery(username, searchQuery, sortBy, uiElt){
-    var eventObj = {"username": username, "time": getTime(), "searchQuery": searchQuery, "sortBy":sortBy, "uiElt":uiElt, "event": "searchSort"}
+function logSearchQuery(username, searchQuery, sortBy, uiElt, notes){
+    var eventObj = {"username": username, "time": getTime(), "searchQuery": searchQuery, "sortBy":sortBy, "uiElt":uiElt, "notes": notes, "event": "searchSort"}
     allData["history"]["events"].push(eventObj)
-    console.log(allData["history"]["events"])
+    //console.log(allData["history"]["events"])
 }
 
-function logFeedback(username, uiElt){
-    var eventObj = {"username": username, "time": getTime(), "uiElt":uiElt, "event": "feedback"}
+function logFeedback(username, uiElt, notes){
+    var eventObj = {"username": username, "time": getTime(), "uiElt":uiElt, "notes":notes, "event": "feedback"}
     allData["history"]["events"].push(eventObj)    
-    console.log(allData["history"]["events"])
+    //console.log(allData["history"]["events"])
 }
 
 

@@ -43,7 +43,7 @@ function createHashtagDiv(hashtag, counts){
         span.click(function(){
             console.log("search for "+hashtag)
             //alert("hierarhcy")
-            search(hashtag, "default", "hierarchy")
+            search(hashtag, "default", "hierarchy", answer)
         })
     }
     wrap(hashTagSpan, hashtag)
@@ -73,13 +73,9 @@ function orderAndEnchild(hashtagArray, allHTags){
         var largestHashtag = queue[0]
         var largestHashtagId = largestHashtag["hashtag"]["hashtag"]
         answer.push(largestHashtag)
-        console.log("LARGEST HASHTAG")
-        console.log(largestHashtag["hashtag"])
         //remove largestHashtag from the array
         var index = queue.indexOf(largestHashtag);
         var eltToSplice = queue.splice(index, 1)
-        console.log("splice")
-        console.log(eltToSplice[0]["hashtag"]["hashtag"]);
         
         var lookForChildrenHashtags = []
         
@@ -104,8 +100,6 @@ function orderAndEnchild(hashtagArray, allHTags){
                 //it is enchilded, you can't remove it (it isn't in the queue anymore)
             }
         }
-        console.log("childrenOflargestHashtag")
-        console.log(childrenOflargestHashtag)
         //operate on all children
         //CHANGE THEIR PARENTAGE - I NEED COPIES
         //add parents to the children AND recurse into them

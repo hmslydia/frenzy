@@ -26,11 +26,11 @@ function searchHelper(){
     var searchQuery = $("#search").val();
     search(searchQuery, "default", "searchbar");
 }
-function search(searchQuery, sortBy, uiElt) { 
+function search(searchQuery, sortBy, uiElt, notes) { 
     if (sortBy === undefined){
         sortBy = "default"
     }
-    ajax("searchTweets", {"searchQuery":searchQuery, "sortBy":sortBy, "uiElt": uiElt}, function(returnData) {
+    ajax("searchTweets", {"searchQuery":searchQuery, "sortBy":sortBy, "uiElt": uiElt, "notes":notes}, function(returnData) {
         var twitterFeed = JSON.parse(returnData)["twitterFeed"]
         var likes = JSON.parse(returnData)["likes"]
 		
