@@ -1,5 +1,5 @@
 function goalSetup(){
-    $("#goalDescription").html("Each item must have at least one hashtag")
+    $("#goalDescription").html("Each photo must have at least 1 hashtag")
 }
 
 function displayConditionsUpdate(matchingBaseTweetObjects, nonMatchingBaseTweetObjects,likes){

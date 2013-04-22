@@ -86,14 +86,15 @@ allData["history"]["location"] = [
 //require('./datasets/siggraph')
 //require('./datasets/HCOMP')
 //require('./datasets/photoAlbum_20-49')
-//require('./datasets/photoAlbum_ALL');
+
 //require('./datasets/testTweets3');
 //require('./saved/caitlin and danielle-hierarchy')
 
+
 /*FOR USER STUDY*/
 
-//require('./datasets/colors10');
-require('./datasets/photoAlbum_ALL');
+require('./datasets/colors10');
+//require('./datasets/photoAlbum_ALL');
 
 
 /*MTURK Datasets*/
