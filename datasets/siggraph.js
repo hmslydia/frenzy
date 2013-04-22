@@ -1,3 +1,15 @@
+completionCondition=[
+	{
+	"number1":"all",
+	"attribute1":"discussion",
+	"number2":"2",
+	"attribute2":"hashtags"
+	}
+] 
+
+requiredHashtags=["#"]
+
+
 tweets = {
     "siggraph0": {
         "time": 0, 

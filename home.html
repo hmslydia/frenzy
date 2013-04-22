@@ -26,6 +26,7 @@
 <script type = "text/javascript" src="twitterFeed.js"></script>
 <script type = "text/javascript" src="hashtagSummary.js"></script>
 <script type = "text/javascript" src="editTweets.js"></script>
+<script type = "text/javascript" src="goals.js"></script>
 
 <style type="text/css">
 
@@ -75,23 +76,28 @@ label{
 }
 .replyTextDiv{
 	margin-top:15px;
-	border-top-style:solid;
+	/*border-top-style:solid;
 	border-top-color:blue;
-	border-top-width: 1px;
+	border-top-width: 1px;*/
 	
-	border: 1px solid blue;
+	/*border: 1px solid blue;*/
 	padding-bottom: 5px;
+    border-radius: 6px;
 }
 
 .subReplyTextArea{
 	border: 1px solid blue;
 	padding-bottom: 20px;
 	margin-bottom: 8px;
+    border-radius: 6px;
 }
 
 .discussionFeed{
 	margin-top: 5px;
 	margin-bottom: 10px;
+    margin-left:0px;
+    
+    border-radius: 6px;
 }
 
 .replyButton{
@@ -123,6 +129,12 @@ label{
 	position: relative;
 }
 
+#goalSummaryContainer{
+    padding:5px;
+    margin: 5px;
+    background-color: white;
+    border-radius: 6px;
+}
 #hashtagSummaryContainer{
     padding:5px;
     margin: 5px;
@@ -281,6 +293,22 @@ h2 {
 .beingEdited{
     border: 5px solid blue;
 }
+
+/*
+Styles for the goals/requiresment (each item needs at least one hashtag)
+*/
+#matchingRequirmentsButton{
+    margin-right: 20px;
+}
+#completenessFeedback{
+    display: inline-block;
+    margin-left: 425px;
+}
+    
+#signOut{
+    margin-left: 10px;
+}
+
 </style>
 
 
@@ -333,7 +361,7 @@ function goToHome(){
 }
 
 $(document).ready(function(){
-    conditionsSetup()
+    goalSetup()
     twitterFeedSetup()
 	textSearchSetup()
     
@@ -379,9 +407,10 @@ function showHideChat() {
 }
 
 function getCompletionConditionHashtags(){
-    var requirementString = $("#requirements").val()
-
-    return requirementString;
+    //var requirementString = $("#requirements").val()
+    //return requirementString;
+    
+    return "#"
 }
 
 //////////////////////////////////////////
@@ -460,6 +489,7 @@ function updateChatConversation(commentsArray) {
 // completion update helpers
 //////////////////////////////////////////
 var int=self.setInterval(function(){checkForUpdates()},1000);
+
 function checkForUpdates(){
 	ajax("getUpdates",{"completionConditionHashtags": getCompletionConditionHashtags()}, function(returnData) {
 		var count = JSON.parse(returnData)["newTweetCount"]
@@ -697,10 +727,10 @@ function createHashtagli(hashtag, counts){
     
 <div id="container" class="container">
     <div class="row">
-        <div class="span2" >
+        <div class="span3" >
             <div class= "sidebar-nav-fixed">
                 <div class="row">
-                    <div class="span2" >
+                    <div class="span3" >
                        <div id ="composeTweetContainer" style="width:100%" >
                             <div class="column" id="composeTweet">
                                 
@@ -708,8 +738,24 @@ function createHashtagli(hashtag, counts){
                         </div>
                     </div>
                 </div>
+                
                 <div class="row">
-                   <div class="span2" >
+                    <div class="span3" >
+                       <div id ="goalSummaryContainer" style="width:100%" >
+                            
+                            <b>Goal:</b><br>
+                            <div id="goalDescription">
+                           
+                            </div>
+                            <div id="goalFeedback">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                <div class="row">
+                   <div class="span3" >
                         <div id ="hashtagSummaryContainer" style="width:100%">
                             <div class="column" id="hashtagSummary">
                             
@@ -721,33 +767,14 @@ function createHashtagli(hashtag, counts){
                 </div>
             </div>
         </div>
-        <div class="span10" >
-                <div class="right-side-container" >
-                
-                    
-                    <div class="row">
-                        <div style="position:fixed">
-                            <div class="span10" >
-                                <div style="background-color: #009933;  width:93%; margin-right:100px">
-                                	<div id="completenessEvaluation">
-                                	</div>
-                                </div>
-                             </div>
-                                 
-                        </div>
-                    </div>
-                    <div class="row">
-                
-                        <div>
-                            <div class="span10">
-                                <div id ="feedDiv">
-                                    <div class="span10" id="twitterFeed">
-                                    </div>
-                                </div>        
-                            </div>
-                        </div>  
+        <div class="span9" > 
+            <div class="row">                
+                <div class="span9">
+                    <div id ="feedDiv">
+                        <div class="span9" id="twitterFeed">
                             
-                    <div>
+                        </div>        
+                    </div>                            
                 </div>
             </div>
         </div>
@@ -761,54 +788,6 @@ function createHashtagli(hashtag, counts){
    <textarea type="text" id="chatEnterArea"></textarea>
 
 </div>    
-<!--
-<div id="container" class="container">
-    <div class="row">
-        <div class="span2" >
-            <div class= "sidebar-nav-fixed">
-                <div class="row">
-                    <div class="span2" >
-                       <div id ="composeTweetContainer" style="width:100%" >
-                            <div class="column" id="composeTweet">
-                                
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                   <div class="span2" >
-                        <div id ="hashtagSummaryContainer" style="width:100%">
-                            <div class="column" id="hashtagSummary">
-                            
-                            </div>
-                            <input type="button" class="btn" id="outputButton" value= "Output" onclick="outputHierarchy(this)" />
-                       </div>
-                   
-            </div>       
-                    </div>
-                </div>
-        </div>
-        <div class="row">
-        	<div class="span10">
-		        <div class="row">
-		            <div class="span10">
-			             <div class="sidebar-nav-fixed" id="completenessEvaluation">
-			             </div>
-		        	</div>
-		        </div>
-		        <div class="row">
-			        <div class="span10">
-			            <div id ="feedDiv">
-			                <div class="span10" id="twitterFeed">
-			                </div>
-			            </div>        
-			        </div>
-		        </div>
-        	</div>
-        </div>
-    
-    </div>
-</div>
--->
+
 </body>
 </html>

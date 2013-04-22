@@ -7,7 +7,19 @@ app.use(express.cookieParser());
 app.use(express.session({ secret: "keyboard cat" }))
 app.use(express.bodyParser());
 
-var allData = {"tweets":{},"streams":{},"users":{},"likes":[],"requiredHashtags": [], "conversation":[], "currentLocations":[], "history":{"locations":[], "clicks":[]}}
+var allData = {
+"tweets":{},
+"streams":{},
+"users":{},
+"likes":[],
+"requiredHashtags": [], 
+"conversation":[], 
+"currentLocations":[], 
+"history":{ 
+    "locations":[], 
+    "events":[]
+    }
+}
 
 var numberOfTweetsToDisplayIncrementSize = 2
 
@@ -107,6 +119,11 @@ app.get('/utils.js', function(request, response){
 require('./textSearch');
 app.get("/textSearch.js", function(require, response) {
     response.sendfile("textSearch.js")
+})
+
+require('./goals');
+app.get("/goals.js", function(require, response) {
+    response.sendfile("goals.js")
 })
 
 require('./twitterFeed');
@@ -342,7 +359,8 @@ app.post('/home.html', function(request, response){
         
 	    response.send(JSON.stringify({ "discussionFeed" : returnDiscussionObjects, "hashtagSummary": getHashtagSummary(),"likes":allData["likes"]}));	    
   
-    }else if (command == "updateTweet"){
+    }
+    else if (command == "updateTweet"){
         var tweetId=args["tweetId"]
         var newContent=args["newContent"]
         
@@ -433,7 +451,7 @@ app.post('/home.html', function(request, response){
         response.send(JSON.stringify({"newTweetCount":count,"newTweetCreators":creators, "newLikeIds":newLikeIds,"completionDataObjects":completionDataObjects,"likes":allData["likes"]}))
 
 		
-	}else if (command == "getRequiredHashtagValues"){
+	}/*else if (command == "getRequiredHashtagValues"){
 		requiredHashtagValues = []
 		var tweetIds = args["tweetIds"]
 		for(twtId in tweetIds){
@@ -442,10 +460,11 @@ app.post('/home.html', function(request, response){
 		}
 		response.send(JSON.stringify({"requiredHashtagValues":requiredHashtagValues}))
 	
-	}else if (command == "SignIn"){
+	}*/else if (command == "SignIn"){
     	
     	var newUsername=args["username"];
 
+        logSignIn(newUsername)
         initSession(request, newUsername)
         
     	//User already exists
@@ -465,6 +484,10 @@ app.post('/home.html', function(request, response){
         var username = request.session.user
         var searchQuery = args["searchQuery"]     
         var sortBy = args["sortBy"]
+        var uiElt = args["uiElt"]
+        console.log(uiElt)
+        
+        logSearchQuery(username, searchQuery, sortBy, uiElt)
         
         var searchResultsBaseTweetIds = getQueryResultIds(searchQuery, allData["tweets"])
         var matchingTweetIds = searchResultsBaseTweetIds["matchingTweetIds"]
@@ -517,7 +540,13 @@ app.post('/home.html', function(request, response){
         //var currentLocations = allData["currentLocations"]
 	    //response.send(JSON.stringify({"locations": currentLocations}))
         response.send("")
-	}    
+        
+	}else if (command == "logFeedbackClicks") {
+        var username = args["username"]
+        var uiElt = args["uiElt"]
+        logFeedback(username, uiElt)
+        response.send("")
+	}       
     
 })
 
@@ -527,6 +556,30 @@ function getNewConvos(request) {
 	request.session.lastUpdateTime = getTime()
 	return newConversations;
 }
+
+//////////////////////////////////////////
+// event logging helpers
+//////////////////////////////////////////
+
+function logSignIn(username){
+    var eventObj = {"username": username, "time": getTime(), "event": "signIn"}
+    allData["history"]["events"].push(eventObj)
+    console.log(allData["history"]["events"])
+}
+
+function logSearchQuery(username, searchQuery, sortBy, uiElt){
+    var eventObj = {"username": username, "time": getTime(), "searchQuery": searchQuery, "sortBy":sortBy, "uiElt":uiElt, "event": "searchSort"}
+    allData["history"]["events"].push(eventObj)
+    console.log(allData["history"]["events"])
+}
+
+function logFeedback(username, uiElt){
+    var eventObj = {"username": username, "time": getTime(), "uiElt":uiElt, "event": "feedback"}
+    allData["history"]["events"].push(eventObj)    
+    console.log(allData["history"]["events"])
+}
+
+
 
 //////////////////////////////////////////
 // search helpers

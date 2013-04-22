@@ -13,7 +13,7 @@ function textSearchSetup(){
         //get what they sorted by
         var sortByValue = $("#sortBy option:selected").val()
         var searchQuery = $("#search").val();
-        search(searchQuery, sortByValue);
+        search(searchQuery, sortByValue, "sortbar");
     })
     
 }
@@ -24,13 +24,13 @@ function escapeRegExp(str) {
 
 function searchHelper(){
     var searchQuery = $("#search").val();
-    search(searchQuery, "default");
+    search(searchQuery, "default", "searchbar");
 }
-function search(searchQuery, sortBy) { 
+function search(searchQuery, sortBy, uiElt) { 
     if (sortBy === undefined){
         sortBy = "default"
     }
-    ajax("searchTweets", {"searchQuery":searchQuery, "sortBy":sortBy}, function(returnData) {
+    ajax("searchTweets", {"searchQuery":searchQuery, "sortBy":sortBy, "uiElt": uiElt}, function(returnData) {
         var twitterFeed = JSON.parse(returnData)["twitterFeed"]
         var likes = JSON.parse(returnData)["likes"]
 		

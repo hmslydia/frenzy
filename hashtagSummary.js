@@ -1,10 +1,12 @@
 var answer = []
 
 
-function displayHashtagSummary(hashtagSummary){
-    console.log("hashtagSummary")
-    console.log(hashtagSummary)
+function displayHashtagSummary(hashtagSummary){    
     $("#hashtagSummary").empty()
+    
+    var goalSpan = $("<span>")
+    goalSpan.html("<b>Goal</b>:<br>Each category has at least two items<br><br>")
+    $("#hashtagSummary").append(goalSpan)
 
     answer = []
     var allHashtags = []
@@ -39,8 +41,9 @@ function createHashtagDiv(hashtag, counts){
     
     wrap = function(span, hashtag){
         span.click(function(){
-        console.log("search for "+hashtag)
-            search(hashtag, "default")
+            console.log("search for "+hashtag)
+            //alert("hierarhcy")
+            search(hashtag, "default", "hierarchy")
         })
     }
     wrap(hashTagSpan, hashtag)

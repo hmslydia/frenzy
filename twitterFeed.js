@@ -43,78 +43,52 @@ function setRequiredHashtags(requiredHashtags){
 
 }
 
+//DEPREICATED
 function conditionsSetup(){
-	//var numMatchingTweetObjects = matchingBaseTweetObjects.length
-	//var numNonMatchingBaseTweetObjects = nonMatchingBaseTweetObjects.length
+	//goal instructions for the users.   
+	var conditionsText = $("<span><h2>Goal: All items must contain at least one hashtag:</h2></span><br>")
+	//var completenessTextArea = $("<input type='text' id='requirements' style='margin:5px; width:20%' onblur='checkForUpdates();' onfocus='checkForUpdates();' onchange='checkForUpdates();' onkeydown='checkForUpdates();' readonly>")
+    var completenessFeedBackDiv = $("<div id='completenessFeedback'>")
 
-	var conditionsText = $("<span><h2>All tweets must contain:</h2></span><br>")
-	var completenessTextArea = $("<input type='text' id='requirements' style='margin:5px; width:20%' onblur='checkForUpdates();' onfocus='checkForUpdates();' onchange='checkForUpdates();' onkeydown='checkForUpdates();' readonly>")
-	var completenessButton = $("<input type='button' class='btn' id='outputTableButton' value= 'Output' onclick='outputTable(this)'>")
-	var completenessFeedBackDiv = $("<div id='completenessFeedback'>")
-    /*
-	var happyButton = $("<input type='button' class='btn' id='matchingRequirmentsButton' value='"+numMatchingTweetObjects+" :)'> ")
-	happyButton.click(function(){
-		displayFeed(matchingBaseTweetObjects)
-	})
-	$("#completenessEvaluation").append(happyButton)
-    
-	var sadButton = $("<input type='button' class='btn' id='nonMatchingRequirmentsButton' value='"+numNonMatchingBaseTweetObjects+" :('> ")
-	sadButton.click(function(){
-		displayFeed(nonMatchingBaseTweetObjects)
-	})
-    $("#completenessEvaluation").append(sadButton)
-	*/
 	$("#completenessEvaluation").append(conditionsText)
-	$("#completenessEvaluation").append(completenessTextArea)
-	//$("#completenessEvaluation").append(completenessButton)
+	//$("#completenessEvaluation").append(completenessTextArea)
 	$("#completenessEvaluation").append(completenessFeedBackDiv)
-	
-	
-	//adjust the margin-top of the twitterFeed div
-	var height = $("#completenessEvaluation").height();
-	$("#twitterFeed").css('margin-top',height+5);	
+		
+	positionTwitterFeedBelowCompletenessEvaluation()	
 }
 
-
+/*
+//DEPRICATED
 function displayConditionsUpdate(matchingBaseTweetObjects, nonMatchingBaseTweetObjects,likes){
-     $("#completenessFeedback").empty()
-     $("#completenessFeedback").css('display','inline-block')
-    
-     $("#completenessFeedback").css('margin-left','75px')
-
-	var numMatchingTweetObjects = matchingBaseTweetObjects.length
+    var numMatchingTweetObjects = matchingBaseTweetObjects.length
 	var numNonMatchingBaseTweetObjects = nonMatchingBaseTweetObjects.length
-
-	var happyButton = $("<input type='button' class='btn' id='matchingRequirmentsButton' value='"+numMatchingTweetObjects+" Complete'> ")
+    
+    //remove old feedback and create new completeness buttons
+    $("#completenessFeedback").empty()
+    var happyButton = $("<input type='button' class='btn' id='matchingRequirmentsButton' value='"+numMatchingTweetObjects+" Complete'> ")
 	happyButton.click(function(){
 		displayFeed(matchingBaseTweetObjects,likes)
 	})
     $("#completenessFeedback").append(happyButton)
-    $("#matchingRequirmentsButton").css('margin-right','20px')
 	
+    // UNsatisfied Constraints
 	var sadButton = $("<input type='button' class='btn' id='nonMatchingRequirmentsButton' value='"+numNonMatchingBaseTweetObjects+" In Progress'> ")
 	sadButton.click(function(){
 		displayFeed(nonMatchingBaseTweetObjects,likes)
 	})
-
-
     $("#completenessFeedback").append(sadButton)
-	/*
-	$("#completenessEvaluation").append(conditionsText)
-	$("#completenessEvaluation").append(completenessTextArea)
-	$("#completenessEvaluation").append(completenessButton)
-	$("#completenessEvaluation").append(happyButton)
-	$("#completenessEvaluation").append(sadButton)
-	*/
+    
+    positionTwitterFeedBelowCompletenessEvaluation()
+}
+*/
+
+function positionTwitterFeedBelowCompletenessEvaluation(){
 	//adjust the margin-top of the twitterFeed div
 	var height = $("#completenessEvaluation").height();
 	$("#twitterFeed").css('margin-top',height+5);	
 }
 
-function displayFeed(twitterFeed,likes){
-	console.log("twitterFeed")
-    console.log(twitterFeed)
-    
+function displayFeed(twitterFeed,likes){    
     //displayConditionsUpdate([],[])
 	$("#twitterFeed").empty()	
 	
