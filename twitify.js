@@ -85,11 +85,15 @@ allData["history"]["location"] = [
 //require('./datasets/testTweets2');
 //require('./datasets/siggraph')
 //require('./datasets/HCOMP')
-require('./datasets/photoAlbum_20-49')
+//require('./datasets/photoAlbum_20-49')
+//require('./datasets/photoAlbum_ALL');
 //require('./datasets/testTweets3');
 //require('./saved/caitlin and danielle-hierarchy')
 
 /*FOR USER STUDY*/
+
+//require('./datasets/colors10');
+require('./datasets/photoAlbum_ALL');
 
 
 /*MTURK Datasets*/
@@ -108,9 +112,6 @@ require('./datasets/photoAlbum_20-49')
 
 var utils = require('./node-utils');
 //var search = require('./searchHelpers-server');
-
-
-
 
 app.get('/utils.js', function(request, response){
     response.sendfile('utils.js')
