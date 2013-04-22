@@ -5,7 +5,7 @@ function displayHashtagSummary(hashtagSummary){
     $("#hashtagSummary").empty()
     
     var goalSpan = $("<span>")
-    goalSpan.html("<b>Goal</b>:<br>Each category has at least two items<br><br>")
+    goalSpan.html("<b>Goal</b>:<br>Each hashtag needs at least two photos<br><br>")
     $("#hashtagSummary").append(goalSpan)
 
     answer = []

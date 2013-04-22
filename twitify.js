@@ -85,9 +85,11 @@ allData["history"]["location"] = [
 //require('./datasets/testTweets2');
 //require('./datasets/siggraph')
 //require('./datasets/HCOMP')
-require('./datasets/photoAlbum_20-49')
+//require('./datasets/photoAlbum_20-49')
 //require('./datasets/testTweets3');
 //require('./saved/caitlin and danielle-hierarchy')
+require('./datasets/colors10')
+
 
 /*FOR USER STUDY*/
 
