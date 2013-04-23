@@ -88,11 +88,12 @@ allData["history"]["location"] = [
 //require('./datasets/photoAlbum_20-49')
 //require('./datasets/testTweets3');
 //require('./saved/caitlin and danielle-hierarchy')
-require('./datasets/colors10')
+
 
 
 /*FOR USER STUDY*/
-
+require('./datasets/colors10')
+//require('./datasets/photoAlbum_ALL')
 
 /*MTURK Datasets*/
 
