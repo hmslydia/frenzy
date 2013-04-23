@@ -274,7 +274,7 @@ h2 {
 }
 
 #chatBox.hideChat {
-  bottom: -35% !important;
+  bottom: -130px !important;
 }
 
 .button{
@@ -384,17 +384,28 @@ $(document).ready(function(){
 
 
     $("#sendChat").click(function(event) {
-      var phrase = $("#chatEnterArea").val();
-      $("#chatEnterArea").val("");
-      clearInterval(timer);
-      timer = null;
-      pushChatConversation(phrase);
+       sendChat();
     });
+
+    $("#chatEnterArea").keypress(function(event) {
+       if(event.which == 13) {
+           event.stopPropagation();
+           sendChat();
+       }
+    })
 
    // Load up initial chat log
 	getChatConversation() 
         
 })
+
+function sendChat() {
+    var phrase = $("#chatEnterArea").val();
+    $("#chatEnterArea").val("");
+    clearInterval(timer);
+    timer = null;
+    pushChatConversation(phrase);
+}
 
 function showHideChat() {
   if(chatShowing) {
