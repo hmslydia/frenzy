@@ -279,7 +279,7 @@ h2 {
 }
 
 #chatBox.hideChat {
-  bottom: -35% !important;
+  bottom: -130px !important;
 }
 
 .button{
@@ -329,7 +329,7 @@ function getUserName(){
 function ajax(command, result, cb) {    
     //console.log("ajax command: "+command);
     //console.log(result)
-	result["username"] = getUserName()
+  result["username"] = getUserName()
 	$.post(document.location.href, { "command" : command, args : JSON.stringify(result) }, cb)
 }
 
@@ -405,17 +405,29 @@ $(document).ready(function(){
 
 
     $("#sendChat").click(function(event) {
-      var phrase = $("#chatEnterArea").val();
-      $("#chatEnterArea").val("");
-      clearInterval(timer);
-      timer = null;
-      pushChatConversation(phrase);
+       sendChat();
     });
+
+    $("#chatEnterArea").keypress(function(event) {
+      if(event.which == 13 && !event.shiftKey) {
+        // Shift key to add new line
+           event.preventDefault();
+           sendChat();
+       }
+    })
 
    // Load up initial chat log
 	getChatConversation() 
         
 })
+
+function sendChat() {
+    var phrase = $("#chatEnterArea").val();
+    $("#chatEnterArea").val("");
+    clearInterval(timer);
+    timer = null;
+    pushChatConversation(phrase);
+}
 
 function showHideChat() {
   if(chatShowing) {

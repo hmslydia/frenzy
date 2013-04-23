@@ -7,6 +7,7 @@ completionCondition=[
 	}
 ] 
 
+requiredHashtags=["#"]
 	
 tweets = {
     "nature0": {
@@ -708,12 +709,12 @@ tweets = {
         "id": "nature99", 
         "parent": "none", 
         "creator": "nature"
-    },
+    }/*,
      "nature100": {
         "time": 100, 
-        "html": "#foo :\"snow\" <img src='http://abstract.cs.washington.edu/~hmslydia/cascadeImages/nature/images/97033.jpg'  width='95%'  display='block' >", 
+        "html": "<img src='http://abstract.cs.washington.edu/~hmslydia/cascadeImages/nature/images/97033.jpg'  width='95%'  display='block' >", 
         "id": "nature100", 
         "parent": "none", 
         "creator": "nature"
-    }
+    }*/
 }
