@@ -140,7 +140,11 @@ label{
     margin: 5px;
     background-color: white;
     border-radius: 6px;
+    overflow-y: scroll;
+    min-height: 200px;
+    
 }
+
 /*
 #completenessEvaluation{
 	padding-top: 5px;
@@ -167,6 +171,7 @@ label{
 }
 .sidebar-nav-fixed {
      position:fixed;
+     /*overflow-y: scroll;*/
 }
 
 #newTweetCounter{
@@ -360,7 +365,23 @@ function goToHome(){
 	$("#counter").text("");
 }
 
+window.onresize=function(event){
+		var chatboxHeight = $("#chatBox").height()
+		
+		var topLeft = $("#hashtagSummaryContainer").position().top +40;
+		console.log("TOPLEFT "+topLeft);
+		var margin = 30;
+        var h = window.innerHeight - chatboxHeight - topLeft - margin;
+
+        
+        $("#hashtagSummaryContainer").css("max-height",h + "px");
+        
+};
+
 $(document).ready(function(){
+
+	window.resizeTo(window.innerWidth,window.innerHeight);
+    
     goalSetup()
     twitterFeedSetup()
 	textSearchSetup()
