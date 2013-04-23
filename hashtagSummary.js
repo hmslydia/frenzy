@@ -158,13 +158,15 @@ function displayComposeTweet(username){
 }
 
 function createcomposeTweetDiv(username){
-    div= $("<div id='mainComposeTweetDiv'>")
+    var div = $("<div id='mainComposeTweetDiv'>")
     var userNameSpan = $("<span class='userNameSpan'>")
     userNameSpan.text("Welcome, "+ username)
     var signOutButton= $("<input type='button' class='btn' id='signOut' value='Sign Out' onclick='signOut()' />")
     var composeTweetBar = $("<textarea class='span2' id='composeTweetTextarea' placeholder='Compose New Tweet' rows='1' onBlur='resetComposeTweet(this)'>")
     //var composeButton = $("<input type='button' class='btn' id='searchSubmit' value= 'Search' />")
     
+	var goalSuccessDiv = $("<div id='goalSuccess'>")
+	
     wrap = function(composeTwt,mainDiv){
         composeTwt.focus(function(){
         
@@ -187,6 +189,7 @@ function createcomposeTweetDiv(username){
     
     div.append(userNameSpan)
     div.append(signOutButton)
+	div.append(goalSuccessDiv)
     //div.append(composeTweetBar)
     return div
 }

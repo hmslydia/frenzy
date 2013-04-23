@@ -26,7 +26,7 @@ tweets = {
         "id": "color1", 
         "parent": "none", 
         "creator": "colors"
-    }, 
+    }/*, 
     "color2": {
         "time": 2, 
         "html": "<div style='height:100px; width: 100px; background-color:PowderBlue'></div>", 
@@ -82,5 +82,5 @@ tweets = {
         "id": "color9", 
         "parent": "none", 
         "creator": "colors"
-    }
+    }*/
 }

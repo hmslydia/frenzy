@@ -361,9 +361,12 @@ app.post('/home.html', function(request, response){
   
     }
     else if (command == "updateTweet"){
-        var tweetId=args["tweetId"]
-        var newContent=args["newContent"]
-        
+        var tweetId = args["tweetId"]
+        var newContent = args["newContent"]
+        var username = args["username"]
+		
+		var oldContent = allData["tweets"][tweetId]["html"]
+		logTweetEdit(username, oldContent, newContent)
         //updateTweet in database
         allData["tweets"][tweetId]["html"] = newContent
         allData["tweets"][tweetId]["time"] = getTime()
@@ -585,7 +588,11 @@ function logFeedback(username, uiElt, notes){
     //console.log(allData["history"]["events"])
 }
 
-
+function logTweetEdit(username, oldContent, newContent){
+    var eventObj = {"username": username, "time": getTime(), "oldContent":oldContent, "newContent":newContent, "event": "editTweet"}
+    allData["history"]["events"].push(eventObj)    
+    console.log(allData["history"]["events"])	
+}
 
 //////////////////////////////////////////
 // search helpers
