@@ -388,7 +388,8 @@ $(document).ready(function(){
     });
 
     $("#chatEnterArea").keypress(function(event) {
-       if(event.which == 13) {
+      if(event.which == 13 && !event.shiftKey) {
+        // Shift key to add new line
            event.preventDefault();
            sendChat();
        }
