@@ -324,7 +324,7 @@ function getUserName(){
 function ajax(command, result, cb) {    
     //console.log("ajax command: "+command);
     //console.log(result)
-	result["username"] = getUserName()
+  result["username"] = getUserName()
 	$.post(document.location.href, { "command" : command, args : JSON.stringify(result) }, cb)
 }
 
@@ -389,7 +389,7 @@ $(document).ready(function(){
 
     $("#chatEnterArea").keypress(function(event) {
        if(event.which == 13) {
-           event.stopPropagation();
+           event.preventDefault();
            sendChat();
        }
     })
