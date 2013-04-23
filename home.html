@@ -247,8 +247,7 @@ h2 {
    overflow: auto;
    border-radius: 0;
    -webkit-border-radius: 0;
-   width: 72%;
-   float: right;
+   width: 96.5%;
 }
 
 #chatBox button {
@@ -383,9 +382,9 @@ $(document).ready(function(){
     $("#chatTitleBar span").click(showHideChat);
 
 
-    $("#sendChat").click(function(event) {
+/*    $("#sendChat").click(function(event) {
        sendChat();
-    });
+    });*/
 
     $("#chatEnterArea").keypress(function(event) {
       if(event.which == 13 && !event.shiftKey) {
@@ -798,7 +797,7 @@ function createHashtagli(hashtag, counts){
   <div id="chatTitleBar">Chat<span>_</span></div>
    <div id="chatLog">
    </div>
-   <button id="sendChat">Send</button>   
+   <!--<button id="sendChat">Send</button> -->  
    <textarea type="text" id="chatEnterArea"></textarea>
 
 </div>    
