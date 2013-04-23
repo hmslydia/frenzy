@@ -555,7 +555,13 @@ app.post('/home.html', function(request, response){
         var notes = args["notes"]
         logFeedback(username, uiElt, notes)
         response.send("")
-	}       
+	}else if (command == "logDone") {
+        var username = args["username"]
+        var goalAchievedTime = args["goalAchievedTime"]
+        logDone(username, goalAchievedTime)
+        checkpoint()
+        response.send("")
+	}        
     
 })
 
@@ -591,7 +597,13 @@ function logFeedback(username, uiElt, notes){
 function logTweetEdit(username, oldContent, newContent){
     var eventObj = {"username": username, "time": getTime(), "oldContent":oldContent, "newContent":newContent, "event": "editTweet"}
     allData["history"]["events"].push(eventObj)    
-    console.log(allData["history"]["events"])	
+    //console.log(allData["history"]["events"])	
+}
+
+function logDone(username, goalAchievedTime){
+    var eventObj = {"username": username, "time": getTime(), "goalAchievedTime":goalAchievedTime, "event": "done"}
+    allData["history"]["events"].push(eventObj)    
+    //console.log(allData["history"]["events"])	
 }
 
 //////////////////////////////////////////
@@ -1298,7 +1310,7 @@ process.on('uncaughtException', function(err) {
 });
 
 function checkpoint() {
-    writeToFile(results);
+    writeToFile(allData);
 }
 
 // force a checkpoint

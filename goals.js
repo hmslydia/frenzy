@@ -9,13 +9,19 @@ function displayConditionsUpdate(matchingBaseTweetObjects, nonMatchingBaseTweetO
 	var numNonMatchingBaseTweetObjects = nonMatchingBaseTweetObjects.length
 	
 	if( checkGoalsCompleted(numNonMatchingBaseTweetObjects) ){
-		goalAchievedTime = getTime()
+        console.log("checkGoalsCompleted: ")
+		if(goalAchievedTime == -1){
+            goalAchievedTime = getTime()
+        }
 		displayGoalSuccess()
 	}else{
+        var goalSuccessDiv = $("#goalSuccess")
+        goalSuccessDiv.empty()
+        
 		goalAchievedTime = -1
 	}
 	
-	updateGoalStatus()
+	//updateGoalStatus()
     
     //remove old feedback and create new completeness buttons
     $("#goalFeedback").empty()
@@ -68,19 +74,41 @@ function displayGoalSuccess(){
 	var minutesSinceGoalAchieved = millisecondsSinceGoalAchieved/(60*1000)
 	
 	if(minutesSinceGoalAchieved < 1 ){
-		
+        console.log('severity 1: '+millisecondsSinceGoalAchieved)
+		updateGoalStatus("Congrats! The goals have been met!", 1)
 	}else if (minutesSinceGoalAchieved < 2){
-	
+        updateGoalStatus("Goals met! Start adding finishing touches", 2)
 	}else if(minutesSinceGoalAchieved < 3){
-	
+        updateGoalStatus("Think about finishing...", 3)
 	}else if(minutesSinceGoalAchieved < 4){
-	
+        updateGoalStatus("Done is better than perfect.  Please finish soon.", 4)
 	}
 
 }
 
-function updateGoalStatus(){
+function updateGoalStatus(message, severity){
 	var goalSuccessDiv = $("#goalSuccess")
 	goalSuccessDiv.empty()
-	goalSuccessDiv.append("<b>asdf</b>")
+    var messageDiv = $("<div>")
+    messageDiv.html("<b>"+message+"</b>")
+    if(severity == 1){
+        messageDiv.css("background-color", "yellow")
+    }else if (severity == 2){
+        messageDiv.css("background-color", "orange")
+    }else if (severity == 3){
+        messageDiv.css("background-color", "orangered")
+    }else if (severity == 4){
+        messageDiv.css("background-color", "red")
+    }
+    
+    var doneButton = $("<input type='button' class='btn' id='doneButton' value= 'Done' onclick='done()'/>")
+	goalSuccessDiv.append(messageDiv)
+    goalSuccessDiv.append(doneButton)
+}
+
+function done(){
+	ajax("logDone", {"goalAchievedTime":goalAchievedTime}, function(returnData) {
+		
+	});
+    outputHierarchy()
 }

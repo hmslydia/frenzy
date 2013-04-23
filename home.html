@@ -552,7 +552,7 @@ function updateNewTweetCount(count){
 }
 
 
-function outputHierarchy(outputButton){
+function outputHierarchy(){
 	ajax("getTwitterFeed", {}, function(returnData) {
 		createOutput(JSON.parse(returnData)["hashtagSummary"],JSON.parse(returnData)["twitterFeed"])
 	});
