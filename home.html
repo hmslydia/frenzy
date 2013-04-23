@@ -225,7 +225,7 @@ h2 {
 #chatBox {
    position: fixed;
    bottom: 0px;
-   left: 10px;
+   right: 10px;
    width: 200px;
    height: 150px;
    border: 1px solid black;
@@ -252,8 +252,7 @@ h2 {
    overflow: auto;
    border-radius: 0;
    -webkit-border-radius: 0;
-   width: 72%;
-   float: right;
+   width: 96.5%;
 }
 
 #chatBox button {
@@ -404,9 +403,10 @@ $(document).ready(function(){
     $("#chatTitleBar span").click(showHideChat);
 
 
-    $("#sendChat").click(function(event) {
+
+/*    $("#sendChat").click(function(event) {
        sendChat();
-    });
+    });*/
 
     $("#chatEnterArea").keypress(function(event) {
       if(event.which == 13 && !event.shiftKey) {
@@ -512,7 +512,9 @@ function updateChatConversation(commentsArray) {
         p.html(userComment);
         $("#chatLog").append(p);
     }
-    $("#chatLog").animate({ scrollTop: $("#chatLog").attr("scrollHeight") }, 2000); 
+    if(commentsArray.length > 0) {
+      $("#chatLog").animate({ scrollTop: $("#chatLog").attr("scrollHeight") }, 0); 
+    }
     if(!timer) {
         timer = setInterval(function(){getChatConversation()}, 5000);
     }
@@ -572,7 +574,7 @@ function updateNewTweetCount(count){
 }
 
 
-function outputHierarchy(outputButton){
+function outputHierarchy(){
 	ajax("getTwitterFeed", {}, function(returnData) {
 		createOutput(JSON.parse(returnData)["hashtagSummary"],JSON.parse(returnData)["twitterFeed"])
 	});
@@ -817,7 +819,7 @@ function createHashtagli(hashtag, counts){
   <div id="chatTitleBar">Chat<span>_</span></div>
    <div id="chatLog">
    </div>
-   <button id="sendChat">Send</button>   
+   <!--<button id="sendChat">Send</button> -->  
    <textarea type="text" id="chatEnterArea"></textarea>
 
 </div>    

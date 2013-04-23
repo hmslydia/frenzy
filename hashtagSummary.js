@@ -49,7 +49,10 @@ function createHashtagDiv(hashtag, counts){
     wrap(hashTagSpan, hashtag)
     
     countSpan = $("<span >")
-    countSpan.text(" ("+counts+")")    
+    countSpan.text(" ("+counts+")")   
+    if(counts == 1){
+        countSpan.css("color", "red")
+    }    
     
     div.append(hashTagSpan)
     div.append(countSpan)
