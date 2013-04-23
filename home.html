@@ -491,7 +491,7 @@ function updateChatConversation(commentsArray) {
         p.html(userComment);
         $("#chatLog").append(p);
     }
-    $("#chatLog").animate({ scrollTop: $("#chatLog").attr("scrollHeight") }, 2000); 
+    $("#chatLog").animate({ scrollTop: $("#chatLog").attr("scrollHeight") }, 0); 
     if(!timer) {
         timer = setInterval(function(){getChatConversation()}, 5000);
     }
