@@ -332,6 +332,212 @@ function ajax(command, result, cb) {
 	$.post(document.location.href, { "command" : command, args : JSON.stringify(result) }, cb)
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var fromLanguage = "fr";
+var toLanguage = "en";
+var isEnabled = true;
+
+var currentTranslation = {};
+var clickedHashtag =null;
+
+function setup(){
+
+ document.addEventListener("contextmenu", logSelection,false);
+ document.addEventListener("click", logSelectionLeft,false);
+}
+
+function logSelectionLeft(e){
+	console.log("id",e.target['id'].indexOf('editbox'));
+	console.log("e.which",e.which);
+	if(e.which ==1 && e.target['id'].indexOf('editbox')==-1){
+		console.log("logging selections");
+		HideContent('uniquename3')
+	}
+	console.log("log",$(".moveTo")!=null);
+	if(e.which ==1 && $(".moveTo")!=null){
+	var word = getWordAtPoint(e.target, e.x, e.y);
+
+		$('.moveTo').val(word)
+	}
+}
+//On a mouse click, log the word that's clicked if the toggle is on
+function logSelection(e) {
+  
+ // if(isEnabled) {
+    var word = getWordAtPoint(e.target, e.x, e.y);
+    if(word != null) {
+    	e.preventDefault();
+    	console.log("CLICKED WORD",word);
+    	
+    	var d = e.target;
+    	console.log(d.className)
+    	
+    	if(d.className == 'hashtag'){
+    		clickedHashtag = d;
+    		console.log(clickedHashtag);
+	    	while (d != null && d['id'] != 'hashtagSummary') {
+	    		console.log(d['id']);
+	    		d = d.parentNode;
+		    }
+		
+		    // at this point we have found our containing div or we are out of parent nodes
+		    var insideMyDiv = (d != null && d['id'] == 'hashtagSummary');
+	    	
+	    	if(insideMyDiv){
+		    	console.log("INSIDE MY DIV");
+		    	ShowContent('uniquename3')
+	    	}
+	    	else{
+	    		HideContent('uniquename3')
+	    	}
+	    }
+    }
+    else{
+    	console.log("hide");
+    	HideContent('uniquename3')
+   	}
+  return false;
+}
+
+
+
+// Recursively search for the word under the current cursor 
+//  Adapted from: http://stackoverflow.com/a/3710561
+function getWordAtPoint(elem, x, y) {
+    if (elem.nodeType == elem.TEXT_NODE) {
+        var range = elem.ownerDocument.createRange();
+        range.selectNodeContents(elem);
+        var currentPos = 0;
+        var endPos = range.endOffset;
+        while (currentPos + 1 < endPos) {
+            range.setStart(elem, currentPos);
+            range.setEnd(elem, currentPos + 1);
+            if (range.getBoundingClientRect().left <= x && range.getBoundingClientRect().right >= x && range.getBoundingClientRect().top <= y && range.getBoundingClientRect().bottom >= y) {
+                range.expand("word");
+                var ret = range.toString();
+                range.detach();
+                return (ret);
+            }
+            currentPos += 1;
+        }
+    } else {
+        for (var i = 0; i < elem.childNodes.length; i++) {
+            var range = elem.childNodes[i].ownerDocument.createRange();
+            range.selectNodeContents(elem.childNodes[i]);
+            if (range.getBoundingClientRect().left <= x && range.getBoundingClientRect().right >= x && range.getBoundingClientRect().top <= y && range.getBoundingClientRect().bottom >= y) {
+                range.detach();
+                return (getWordAtPoint(elem.childNodes[i], x, y));
+            } else {
+                range.detach();
+            }
+        }
+    }
+    return (null);
+}
+
+
+
+//Get the x and y screen coordinates of the selected text
+// Adapted from: http://stackoverflow.com/a/6847328
+function getSelectionCoords() {
+  var sel = window.getSelection();
+  var x = 0, y = 0;
+  if(sel) {
+    if (sel.rangeCount) {
+        range = sel.getRangeAt(0).cloneRange();
+        if (range.getClientRects) {
+            var rect = range.getBoundingClientRect();
+            x = rect.left;
+            y = rect.top + $(document).scrollTop();
+        }
+    }
+  }
+  return { x: x, y: y };
+}
+
+$(document).ready(setup);
+
+var cX = 0; var cY = 0; var rX = 0; var rY = 0;
+function UpdateCursorPosition(e){ cX = e.pageX; cY = e.pageY;}
+function UpdateCursorPositionDocAll(e){ cX = event.clientX; cY = event.clientY;}
+if(document.all) { document.onmousemove = UpdateCursorPositionDocAll; }
+else { document.onmousemove = UpdateCursorPosition; }
+function AssignPosition(d) {
+	if(self.pageYOffset) {
+		rX = self.pageXOffset;
+		rY = self.pageYOffset;
+		}
+	else if(document.documentElement && document.documentElement.scrollTop) {
+		rX = document.documentElement.scrollLeft;
+		rY = document.documentElement.scrollTop;
+		}
+	else if(document.body) {
+		rX = document.body.scrollLeft;
+		rY = document.body.scrollTop;
+		}
+	if(document.all) {
+		cX += rX; 
+		cY += rY;
+		}
+	d.style.left = (cX ) + "px";
+	d.style.top = (cY ) + "px";
+}
+
+function HideContent(d) {
+	if(d.length < 1) { return; }
+	document.getElementById(d).style.display = "none";
+}
+
+
+function ShowContent(d) {
+	if(d.length < 1) { return; }
+	var dd = document.getElementById(d);
+	AssignPosition(dd);
+	dd.style.display = "block";
+}
+
+function ReverseContentDisplay(d) {
+	if(d.length < 1) { return; }
+	var dd = document.getElementById(d);
+	AssignPosition(dd);
+	if(dd.style.display == "none") { dd.style.display = "block"; }
+	else { dd.style.display = "none"; }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 function signIn(){
 	username=getUserName();
 
@@ -365,12 +571,13 @@ function goToHome(){
 }
 
 window.onresize=function(event){
-		var chatboxHeight = $("#chatBox").height()
+	
+		//var chatboxHeight = $("#chatBox").height()
 		
 		var topLeft = $("#hashtagSummaryContainer").position().top +40;
 		console.log("TOPLEFT "+topLeft);
 		var margin = 30;
-        var h = window.innerHeight - chatboxHeight - topLeft - margin;
+        var h = window.innerHeight - topLeft - margin;
 
         
         $("#hashtagSummaryContainer").css("max-height",h + "px");
@@ -379,7 +586,7 @@ window.onresize=function(event){
 
 $(document).ready(function(){
 
-	window.resizeTo(window.innerWidth,window.innerHeight);
+	
     
     goalSetup()
     twitterFeedSetup()
@@ -418,7 +625,7 @@ $(document).ready(function(){
 
    // Load up initial chat log
 	getChatConversation() 
-        
+    window.onresize();  
 })
 
 function sendChat() {
@@ -453,9 +660,9 @@ var userLocationUpdateTimer = setInterval(function(){updateUserLocations()}, 500
 
 function updateUserLocations(){
     ajax("getLocations", {}, function(returnData) {
-    console.log("getLocations")
+
        var locations = JSON.parse(returnData)["locations"];
-console.log(locations)
+//console.log(locations)
        var username = getUserName()
        var idsInUse = filterArray(locations, function(x){return x["user"] != username})
        var idsInUse = map(idsInUse, function(x){return x["id"]})       
@@ -464,8 +671,8 @@ console.log(locations)
 }
 
 function highlightBaseTweets(listOfBasetweetIdsToHighlight){
-console.log("highlight")
-console.log(listOfBasetweetIdsToHighlight)
+//console.log("highlight")
+//console.log(listOfBasetweetIdsToHighlight)
     //remove all highlights
     $(".basetweet").each(function( index){
         $(this).removeClass("beingEdited")
@@ -717,6 +924,73 @@ function createHashtagli(hashtag, counts){
     return div
 }
 
+
+
+function editHashtagText(){
+
+	var oldHashtag = clickedHashtag.innerHTML;//.substr(1);
+	
+	clickedHashtag.parentNode.innerHTML = "<input id = 'editbox-"+oldHashtag+"' class='editbox' type ='textbox' value='"+oldHashtag+"'>";
+	
+	$("input.editbox").bind("keypress", function(event) {
+	console.log("IN ENTER EVENT");
+        if( event.which == 13 ) {
+	        var newHashtag = $(this).val();
+	        
+          	 console.log("enter");
+             ajax("renameHashtag", {"oldHashtag":oldHashtag.toLowerCase(), "newHashtag":newHashtag.toLowerCase()}, function(returnData) {
+             	var likes = JSON.parse(returnData)["likes"]
+		        var twitterFeed = JSON.parse(returnData)["twitterFeed"]
+		        var hashtagSummary = JSON.parse(returnData)["hashtagSummary"]
+		        var newTweetCreators = JSON.parse(returnData)["newTweetCreators"]
+		        var newLikeIds = JSON.parse(returnData)["newLikeIds"]
+		        var requiredHashtags = JSON.parse(returnData)["requiredHashtags"]
+		        var lastRefreshTime = JSON.parse(returnData)["lastRefreshTime"]
+		        
+		        resetTweetClickUpdateTimes(twitterFeed,lastRefreshTime);
+				displayFeed(twitterFeed,likes);
+				displayHashtagSummary(hashtagSummary)
+				//displayComposeTweet(getUserName())
+				colorNewTweets(newTweetCreators);
+				colorNewLikes(newLikeIds)
+				setRequiredHashtags(requiredHashtags)
+	         });
+       }
+    })
+}
+
+function moveHashtag(){
+	
+	var newChildHashtag = clickedHashtag.innerHTML;
+	
+	clickedHashtag.parentNode.innerHTML = "Move To: <input id = 'moveTo-"+newChildHashtag+"' class='moveTo' type ='textbox' placeholder='select hashtag'>";
+	
+	$("input.moveTo").bind("keypress", function(event) {
+
+        if( event.which == 13 ) {
+	        var parentHashtag = $(this).val();
+          	 console.log("enter");
+             ajax("moveToHashtag", {"newChildHashtag":newChildHashtag.toLowerCase(), "parentHashtag":parentHashtag.toLowerCase()}, function(returnData) {
+             	var likes = JSON.parse(returnData)["likes"]
+		        var twitterFeed = JSON.parse(returnData)["twitterFeed"]
+		        var hashtagSummary = JSON.parse(returnData)["hashtagSummary"]
+		        var newTweetCreators = JSON.parse(returnData)["newTweetCreators"]
+		        var newLikeIds = JSON.parse(returnData)["newLikeIds"]
+		        var requiredHashtags = JSON.parse(returnData)["requiredHashtags"]
+		        var lastRefreshTime = JSON.parse(returnData)["lastRefreshTime"]
+		        
+		        resetTweetClickUpdateTimes(twitterFeed,lastRefreshTime);
+				displayFeed(twitterFeed,likes);
+				displayHashtagSummary(hashtagSummary)
+				//displayComposeTweet(getUserName())
+				colorNewTweets(newTweetCreators);
+				colorNewLikes(newLikeIds)
+				setRequiredHashtags(requiredHashtags)
+	         });
+       }
+    })
+}
+
 </script>
 </head>
 
@@ -795,7 +1069,6 @@ function createHashtagli(hashtag, counts){
                             <div class="column" id="hashtagSummary">
                             
                             </div>
-                            <input type="button" class="btn" id="outputButton" value= "Output" onclick="outputHierarchy(this)" />
                        </div>
                    
                     </div>       
@@ -822,7 +1095,20 @@ function createHashtagli(hashtag, counts){
    <!--<button id="sendChat">Send</button> -->  
    <textarea type="text" id="chatEnterArea"></textarea>
 
-</div>    
+</div>  
+
+
+
+<div 
+   id="uniquename3" 
+   style="display:none; 
+      position:absolute; 
+      border-style: solid; 
+      background-color: white; 
+      padding: 5px;">
+<a onclick="editHashtagText();"><div id='editable'>Rename</div></a>
+<a onclick="moveHashtag();"><div id='editable'>Move To</div></a>
+</div>
 
 </body>
 </html>

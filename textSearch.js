@@ -52,8 +52,8 @@ function search(searchQuery, sortBy, uiElt, notes) {
 
 function userSearch(user) {  
     ajax("searchUsersTweets", {"user":user}, function(returnData) {
-    console.log("searchUsersTweets")
-    console.log(returnData)
+    //console.log("searchUsersTweets")
+    //console.log(returnData)
         var twitterFeed = JSON.parse(returnData)["twitterFeed"]
         var likes = JSON.parse(returnData)["likes"]
 		
@@ -65,7 +65,7 @@ function iterate_node(node,searchQuery) {
     node = $(node)[0]
     //var re = new RegExp("\b"+searchQuery+"\b", "gi");  
     var re = new RegExp(escapeRegExp(searchQuery), "gi");  
-    console.log(re)
+    //console.log(re)
     if (node.nodeType === 3) { // Node.TEXT_NODE
     
         var text = node.data
