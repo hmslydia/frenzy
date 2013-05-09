@@ -94,7 +94,7 @@ function drawPlot(){
 
 	for(var i in ids){
 		if($('#' + ids[i]).is(":checked")){
-			var data = getSeries(studyData, users, colors[i], functions[i], yVals[i])
+			var data = getSeries2(studyData, users, colors[i], functions[i], yVals[i])
 			series = series.concat(data)
 		}
 	}
