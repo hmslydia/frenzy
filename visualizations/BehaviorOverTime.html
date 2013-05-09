@@ -13,29 +13,31 @@
 
 
 <script>
-/* Plots individual user's tags over time */
+/* Plots individual user's behavior over time. */
 
 var users = ["caitbon", "jb", "Awesomesauce99"]
-var colors = ["#458C6B", "#D94436", "#D9A86C"]
+var color1 = ["#D94436", "#D94436", "#D94436"]// var color1 = ["#458C6B", "#D94436", "#D9A86C"]
+var color2 = ["#458C6B", "#458C6B", "#458C6B"]
+var color3 = ["#D9A86C", "#D9A86C", "#D9A86C"]
 
+var series = getSeries(studyData, users, color1, extractTimes);
 
-
-var series = getSeries(studyData, users, colors, extractTimes);
-
-
-$(function () {
+function display (series) {
         $('#container').highcharts({
             chart: {
                 type: 'scatter'
             },
+		    legend: {
+		        enabled: false
+		    },
 		    tooltip: {
 		        enabled: false
 		    },
             title: {
-                text: 'Tags made by participants over time'
+                text: 'Behavior of participants over time'
             },
             subtitle: {
-                text: 'Each dot indicates one tag'
+                text: 'Each dot indicates one behavior (tag, search, or conversation)'
             },
             xAxis: {
                 type: 'datetime',
@@ -74,7 +76,51 @@ $(function () {
             
             series: series
         });
-    });
+ }
+
+function foo(){
+	var checked = $("#variables input:checked")
+
+	var series = [];
+
+	var ids = ["tags", "searches", "conversations"]
+	var functions = [extractTimes, extractSearches, extractConversations]
+	var colors = [color1, color2, color3]
+
+	for(var i in ids){
+		if($('#' + ids[i]).is(":checked")){
+			var data = getSeries(studyData, users, colors[i], functions[i])
+			series = series.concat(data)
+		}
+	}
+	display(series);	
+}
     
 </script>
+<div>
+<form action="#" id="variables">
+<div><input type="checkbox" id="tags" onclick="foo()"></input>Tags<span class="legend" style="color:#D94436">&#8226;</span></div>
+<div><input type="checkbox" id="searches" onclick="foo()"></input>Searches<span class="legend" style="color:#458C6B">&#8226;</span></div>
+<div><input type="checkbox" id="conversations" onclick="foo()"></input>Conversations<span class="legend" style="color:#D9A86C">&#8226;</span></div>
+</div>
+
+
+<style>
+.legend {
+	font-size:37px;
+}
+
+div div{
+    display: block;
+    padding:4px 2px;
+}
+</style>
+
+
+<script>
+display(series);
+$('#tags').prop('checked', true);
+</script>
+</form>
+
 </html>

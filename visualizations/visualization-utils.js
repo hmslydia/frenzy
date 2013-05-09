@@ -30,32 +30,54 @@ function reduce(arr, init, fun){
 	return accum;
 }
 
+function getStartTime(data){
+	return reduce(data["history"]["events"], Number.MAX_VALUE, function(accum, cur){ return cur.time < accum ? cur.time : accum });
+}
 
-intervalLength = 10; // in seconds
-
-function extractBuckets(data, author){
+function extractTimes(data, author, start){
 	var tweets = filter(data["tweets"], function(x) { return x["creator"] == author});  
-	var times = map(tweets, function(x) {return (x.time / 1000)})
-	var start = reduce(times, times[0], function(accum, cur) { return cur < accum ? cur : accum});
-	var end = reduce(times, times[0], function(accum, cur) { return cur > accum ? cur : accum});
-	var numBuckets = Math.ceil((end - start) / intervalLength);
-	console.log(end)
-	var buckets = [];
-	for(var i = 0; i < numBuckets; i++){
-		buckets[i] = 0;
-	}
-	buckets = reduce(times, buckets, function(accum, cur){ 
-			 	var bucket = Math.ceil((cur - start) / intervalLength);
-				accum[bucket] = 1 + (accum[bucket] ? accum[bucket] : 0);
-				return accum;
-			 });
-	return buckets;
+	var times = map(tweets, function(x) {return (x.time)});
+	return map(times, function(x){ return x - start });
+}
+
+function extractConversations(data, author, start){
+	var tweets = filter(data["conversation"], function(x) { return x["user"] == author});  
+	var times = map(tweets, function(x) {return (x.time)});
+	return map(times, function(x){ return x - start });
+}
+
+function extractSearches(data, author, start){
+	var tweets = filter(data["history"]["events"], function(x) { return x["username"] == author && x["searchQuery"]}); 
+	var times = map(tweets, function(x) {return (x.time)});
+	return map(times, function(x){ return x - start }); 
 }
 
 
-function extractTimes(data, author){
-	var tweets = filter(data["tweets"], function(x) { return x["creator"] == author});  
-	var times = map(tweets, function(x) {return (x.time)});
-	var start = reduce(times, times[0], function(accum, cur) { return cur < accum ? cur : accum});
-	return map(times, function(x){ return x - start });
+/* findTimes : a function that returns an array of times of interest from the provided data,
+			   given a data, author, and start time */
+function getSeries(data, users, colors, findTimes){
+	var start = getStartTime(data);
+
+	var tagData = map(users, function(name){ return findTimes(data, name, start)})
+
+	var pos = 1;
+	for(var i in tagData){
+		tagData[i] = map(tagData[i], function(x) { return [x, pos] });
+		pos++;
+	}
+
+	var series = [];
+	for(var i in users){
+		var user = users[i];
+		series.push({
+		            	name: user,
+		           		data:  tagData[i],
+				    	marker: {
+				       		 symbol: 'circle'
+				   		},
+						color: colors[i]
+					});
+	}
+
+	return series;
 }
