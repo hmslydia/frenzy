@@ -224,15 +224,15 @@ function createTweetAndDiscussionDiv(tweetObj, discussionObj,likes){
     var baseReplyDiv = createBaseReplyDiv(baseTweetId)
     var hashTags = $("<div class='span2 hash'>");
     var input = $("<input type='text' class='hashInput' id='input-" + baseTweetId + "'>");
+    var button = $("<button>");
+    button.text("post");
     var paragraph = $("<p>");
     paragraph.text("Enter in a hashtag:");
     hashTags.append(paragraph);
     hashTags.append(input);
-	row.append(hashTags)
-
-
-
-    row.append(baseReplyDiv)
+    hashTags.append(button);
+	row.append(hashTags);
+    row.append(baseReplyDiv);
         
     tweetAndDiscussionDiv.append(baseTweetDiv)
     tweetAndDiscussionDiv.append(discussionDiv)
@@ -579,10 +579,13 @@ function updateDiscussionFeed(baseTweetId,dFeed,likes){
 	var row = $("<div class='row'>");
 	var hashTags = $("<div class='span2 hash'>");
 	var input = $("<input type='text' class='hashInput' id='input-" + baseTweetId + "'>");
+    var button = $("<button value='post'>");
+    button.text("post");
     var paragraph = $("<p>");
     paragraph.text("Enter in a hashtag:");
     hashTags.append(paragraph);
     hashTags.append(input);
+    hashTags.append(button);
 
     row.append(hashTags);
 	row.append(baseReplyDiv);
