@@ -233,6 +233,19 @@ function createTweetAndDiscussionDiv(tweetObj, discussionObj,likes){
     hashTags.append(button);
 	row.append(hashTags);
     row.append(baseReplyDiv);
+
+    wrap2 = function(d,divCopy, twtId){
+	        d.click(function(){
+	        //replyText=$("#replyText-"+twtId).val();
+	        replyText=divCopy.val();
+		    saveTags(replyText,twtId)  
+		    divCopy.val("");
+		     var bigdiv = $("discussion-" + twtId);
+		    var placeholderDiv = bigdiv.find(".postPlaceholder");
+		    toggleReplyDiv(placeholderDiv,twtId)
+	        })
+	}
+	wrap2(button, input, baseTweetId);
         
     tweetAndDiscussionDiv.append(baseTweetDiv)
     tweetAndDiscussionDiv.append(discussionDiv)
@@ -360,9 +373,9 @@ function createDiscussionDivContent(discussionObj,likes){
 }
 
 function populatePastTags(div, id) {
-	var array = ["lol", "omnom", "cats", "dogs", "mice"];
+	var array = ["#lol", "#omnom", "#cats", "#dogs", "#mice"];
 	for(var i = 0; i < array.length; i++) {
-		var item = $("<input type='checkbox'>");
+		var item = $("<input type='checkbox' checked='checked'>");
 		var words = $("<span>");
 		words.text(array[i]);
 		div.append(item);
@@ -479,7 +492,6 @@ function createDiscussionDiv(tweetObj,level,likes){
 // if the post button is clicked, add the discussion tweet (save reply) 
 //////////////////////////////////////////////////////////////////
 function toggleReplyDiv(postPlaceholderDiv,tweetId){
-
 	if((postPlaceholderDiv).hasClass('unclicked')){
 		
 		(postPlaceholderDiv).removeClass('unclicked');
@@ -567,6 +579,37 @@ function saveReply(replyText,parentTweetId){
 	}
 }
 
+function saveTags(replyText,parentTweetId){
+	username=getUserName();
+	if(username!="" && $("#signInOut").val()!="Sign In"){
+		ajax("saveTags", {"parentTweetId" : parentTweetId, "replyText":replyText,"username":username}, function(returnData) {	
+			
+			parsedReturnData = JSON.parse(returnData)
+			var tags = parsedReturnData["updatedTags"];
+			updateTags(tags, parentTweetId);
+			//checkForUpdates();
+
+		});
+	}
+	else{
+		alert("Please Sign In Before Commenting")
+	}
+}
+
+function updateTags(tags, parentTweetId) {
+	var div = $("#discussion-" + parentTweetId);
+	var list = div.find(".pastTags");
+	for(var i = 0 ; i < tags.length; i++ ) {
+		var input = $("<input type='checkbox' checked='checked'>");
+		list.append(input);
+		var span = $("<span>");
+		span.text(tags[i]);
+		list.append(span);
+		list.append($("<br/>"));
+	}
+
+}
+
 function updateDiscussionFeed(baseTweetId,dFeed,likes){
 	tweetClickUpdateTimes[baseTweetId]["lastRefreshTime"] = getTime();
 	var discussDiv = $("#discussion-"+baseTweetId)
@@ -579,14 +622,25 @@ function updateDiscussionFeed(baseTweetId,dFeed,likes){
 	var row = $("<div class='row'>");
 	var hashTags = $("<div class='span2 hash'>");
 	var input = $("<input type='text' class='hashInput' id='input-" + baseTweetId + "'>");
-    var button = $("<button value='post'>");
+    var button = $("<button >");
     button.text("post");
     var paragraph = $("<p>");
     paragraph.text("Enter in a hashtag:");
     hashTags.append(paragraph);
     hashTags.append(input);
     hashTags.append(button);
-
+    wrap2 = function(d,divCopy, twtId){
+	        d.click(function(){
+	        //replyText=$("#replyText-"+twtId).val();
+	        replyText=divCopy.val();
+		    saveTags(replyText,twtId)  
+		    divCopy.val("");
+		    var bigdiv = $("discussion-" + twtId);
+		    var placeholderDiv = bigdiv.find(".postPlaceholder");
+		    toggleReplyDiv(placeholderDiv,twtId);
+	        })
+	}
+	wrap2(button, input, baseTweetId);
     row.append(hashTags);
 	row.append(baseReplyDiv);
 	discussDiv.append(row);

@@ -149,6 +149,7 @@ function initializeAllData(){
     instantiateUsers()
     instantiateRequiredHashtags()
     instantiateConversation()
+    instantiateHashtags()
 
     //instantiateCompletionCondition()
 	
@@ -227,6 +228,10 @@ function instantiateTweets(){
     allData["tweets"] = tweets
 }
 
+function instantiateHashtags() {
+	allData["hashTags"] = [];
+}
+
 function instantiateStreams(){
 
 	allData["streams"] = {
@@ -297,7 +302,8 @@ saveTweet
 updateTweet
 createNewTweet
 
-
+//hashtag shit
+savetags
 
 //SEARCH
 searchTweets
@@ -359,8 +365,34 @@ app.post('/home.html', function(request, response){
         
 	    response.send(JSON.stringify({ "discussionFeed" : returnDiscussionObjects, "hashtagSummary": getHashtagSummary(),"likes":allData["likes"]}));	    
   
-    }
-    else if (command == "updateTweet"){
+    } else if (command == "saveTags"){    
+    	//{"parentTweetId" : parentTweetId, "replyText":tag,"username":username}      	
+	    var tag = args["replyText"];
+  		var parentTweetId = args["parentTweetId"];
+  		var baseTweetId = getBaseTweet(parentTweetId);
+  		var username = args["username"];
+  		var newTagObject = createNewTagsObject(parentTweetId, tag, username);
+  		newId = newTagObject["id"];
+  		console.log("lolololol" + newId)
+  		if(!allData["hashTags"][newId]) {
+  			allData["hashTags"].push({newId: []});
+  		}
+  		allData["hashTags"][newId].push(newTagObject);
+  			var time = newTagObject["time"];
+  		var result = findTagsWithParent(newId, time);
+  		response.send(JSON.stringify({"updatedTags" : result}));
+    } else if (command == "getTags") {
+    	var result = [];
+    	//console.log("length of hashTags:" + allData["hashTags"].length);
+    	for(id in allData["hashTags"]) {//for(var i = 0; i < allData["hashTags"].length; i++) {
+    		console.log("id: " + id[0]+id[1]);
+    		for(tagobject in id) {
+    			console.log(tagobject["html"]);
+    			result.push(tagobject["html"]);
+    		}
+       	}
+       	response.send(JSON.stringify({"allTags" : result}));
+    } else if (command == "updateTweet"){
         var tweetId = args["tweetId"]
         var newContent = args["newContent"]
         var username = args["username"]
@@ -660,6 +692,16 @@ function getQueryResultIds(searchQuery, allTweets){
         var termsToHighlight = [searchQuery]
         return {"matchingTweetIds": findMatchingTweetIds(searchQuery, allTweets), "searchTermArray": termsToHighlight}
     }
+}
+
+function findTagsWithParent(id, time) {
+	var results = [];
+	for(var i = 0; i < allData["hashTags"][id].length; i++) {
+		if (allData["hashTags"][id][i]["time"] >= time) {
+			results.push(allData["hashTags"][id][i]["html"]);
+		}
+	}
+	return results;
 }
 
 function findMatchingTweetIds(searchQuery, allTweets){
@@ -1013,6 +1055,19 @@ function createNewTweetObject(parentTweetId,replyText,username){
     
     return tweetObject;
 }
+
+function createNewTagsObject(parentTweetId, tag, username) {
+	var time=getTime();
+	var newId = getNewTweetId(username)
+	var tagObject = {
+		"time":time,
+		"html":tag,
+		"id":newId,
+		"parent":parentTweetId
+	}
+	return tagObject;
+}
+
 function createNewLikesObject(tweetId,username,time){
 		/*
 	"{
