@@ -215,13 +215,24 @@ function createTweetAndDiscussionDiv(tweetObj, discussionObj,likes){
         })
     }
     wrap(discussionDiv, tweetObj["id"] )
-    
-
+    var row = $("<div class='row'>"); 
+    discussionDiv.append(row);
     discussionDiv.append(discussionDivContent)
+
     
     baseTweetId = tweetObj["id"]
     var baseReplyDiv = createBaseReplyDiv(baseTweetId)
-    discussionDiv.append(baseReplyDiv)
+    var hashTags = $("<div class='span2 hash'>");
+    var input = $("<input type='text' class='hashInput' id='input-" + baseTweetId + "'>");
+    var paragraph = $("<p>");
+    paragraph.text("Enter in a hashtag:");
+    hashTags.append(paragraph);
+    hashTags.append(input);
+	row.append(hashTags)
+
+
+
+    row.append(baseReplyDiv)
         
     tweetAndDiscussionDiv.append(baseTweetDiv)
     tweetAndDiscussionDiv.append(discussionDiv)
@@ -348,6 +359,19 @@ function createDiscussionDivContent(discussionObj,likes){
     return discussionDiv
 }
 
+function populatePastTags(div, id) {
+	var array = ["lol", "omnom", "cats", "dogs", "mice"];
+	for(var i = 0; i < array.length; i++) {
+		var item = $("<input type='checkbox'>");
+		var words = $("<span>");
+		words.text(array[i]);
+		div.append(item);
+		div.append(words);
+		div.append($("<br/>"));
+	}
+	return div;
+}
+
 
 ///////////////////////////////////////////////////////////////////
 // Create a div for the discussion tweet that has the comment that 
@@ -355,16 +379,24 @@ function createDiscussionDivContent(discussionObj,likes){
 //button for others to comment on this comment
 //////////////////////////////////////////////////////////////////
 function createDiscussionDiv(tweetObj,level,likes){
-
+	var overall = $("<div class='row'>");
 	var tweetHTML = tweetObj["html"]
     var tweetId= tweetObj["id"]
     var tweetCreator = tweetObj["creator"]
     
-    div = $("<div class='tweet subReplyTextArea' id= '"+tweetId+"'>")
+    var hash = $("<div class='hash span2'>");
+    var pastHashTags = $("<div class='pastTags'>");
+    pastHashTags = populatePastTags(pastHashTags, tweetId);
+    hash.append(pastHashTags);
+    overall.append(hash);
+    div = $("<div class='tweet subReplyTextArea span3' id= '"+tweetId+"'>")
+    overall.append(div);
     barDiv = $("<div style='margin-top:25px;'>")
     //indent the tweet based on how deeply threaded it is
 	//multiply by 30 px per level
     div.css('margin-left',5+level*30+"px");
+
+
     
     replyContentDiv = $("<div>")
     replyContentDiv.html("<b>"+tweetCreator + "</b><br>" + tweetHTML)
@@ -436,9 +468,9 @@ function createDiscussionDiv(tweetObj,level,likes){
 	    barDiv.append(label);
     }
     
-    barDiv.append(postPlaceholderDiv);
+    overall.append(postPlaceholderDiv); //divBar
     div.append(barDiv)
-    return div;
+    return overall;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -482,8 +514,7 @@ function toggleReplyDiv(postPlaceholderDiv,tweetId){
 function createBaseReplyDiv(parentTweetId){
 	//discussionDiv = $("#discussionDiv")
 	//commentDiv = $("#"+parentTweetId)
-	
-    var containerDiv = $("<div class='replyTextDiv'>")
+    var containerDiv = $("<div class='replyTextDiv span3'>")
 	var div = $("<textarea class='replyTextArea' id='replyTo-"+parentTweetId+"'>")
 	var replyButton = $("<input type='button' class='replyButton' value='post'>")
 	
@@ -545,6 +576,16 @@ function updateDiscussionFeed(baseTweetId,dFeed,likes){
 	var baseReplyDiv = createBaseReplyDiv(baseTweetId)
     
 	discussDiv.append(discussionContent);
-	discussDiv.append(baseReplyDiv);
+	var row = $("<div class='row'>");
+	var hashTags = $("<div class='span2 hash'>");
+	var input = $("<input type='text' class='hashInput' id='input-" + baseTweetId + "'>");
+    var paragraph = $("<p>");
+    paragraph.text("Enter in a hashtag:");
+    hashTags.append(paragraph);
+    hashTags.append(input);
+
+    row.append(hashTags);
+	row.append(baseReplyDiv);
+	discussDiv.append(row);
 }
 
