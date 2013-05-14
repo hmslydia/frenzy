@@ -1,0 +1,138 @@
+<html>
+<head>
+<script src="http://code.jquery.com/jquery-latest.min.js"
+        type="text/javascript"></script>
+
+<script src="../saved/katie-catie-nikki.js"></script>
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<script src="visualization-utils.js"></script>
+</head>
+
+<body>
+<div id="container" style="min-width: 400px; height: 200px; margin: 0 auto"></div>
+</body>
+
+
+<script>
+
+/* Plots individual user's behavior over time. */
+
+var users = filter(studyData["users"], function(x){ return x["counter"] > 0 });
+users = map(users, function(x) { return x.id });
+console.log(users);
+var color1 = ["#D94436", "#D94436", "#D94436"]
+var color2 = ["#458C6B", "#458C6B", "#458C6B"]
+var color3 = ["#D9A86C", "#D9A86C", "#D9A86C"]
+var color4 = ["#7A3B7F", "#7A3B7F", "#7A3B7F"]
+var color5 = ["grey", "grey", "grey"]
+
+function display (series) {
+        $('#container').highcharts({
+            chart: {
+                type: 'scatter'
+            },
+		    legend: {
+		        enabled: false
+		    },
+		    tooltip: {
+		        enabled: false
+		    },
+            title: {
+                text: 'Behavior of participants over time'
+            },
+            subtitle: {
+                text: 'Each dot indicates one behavior (tag, search, conversation, like)'
+            },
+            xAxis: {
+                type: 'datetime',
+				title: { text: 'Minutes elapsed'},
+		        dateTimeLabelFormats: {
+		            second: '%M',
+					minute: '%M',
+					hour: ' ',
+					day: ' ',
+					week: ' ',
+					month: ' ',
+					year: ' '
+		        }
+            },
+            yAxis: {
+                title: {
+                    text: ''
+                },
+				labels: {
+				    formatter: function() {
+				        return users[this.value - 1];
+				    }
+				},
+        		tickInterval: 1,
+				min:0,
+				max:4,
+				showFirstLabel:false,
+				showLastLabel:false
+            },
+            tooltip: {
+                formatter: function() {
+                        return '<b>'+ this.series.name +'</b><br/>'+
+                        Highcharts.dateFormat('%e. %b', this.x) +': '+ this.y +' m';
+                }
+            },
+            
+            series: series
+        });
+ }
+
+function drawPlot(){
+	var checked = $("#variables input:checked")
+
+	var series = [];
+
+	var ids = ["tags", "searches", "conversations", "likes", "feedback"]
+	var functions = [extractTags, extractSearches, extractConversations, extractLikes, extractFeedback]
+	var colors = [color1, color2, color3, color4, color5]
+	var yVals = [1,1,2,1,1]
+
+	for(var i in ids){
+		if($('#' + ids[i]).is(":checked")){
+			var data = getSeries(studyData, users, colors[i], functions[i], yVals[i])
+			series = series.concat(data)
+		}
+	}
+	display(series);	
+
+}
+    
+</script>
+<div>
+<form action="#" id="variables">
+<div><input type="checkbox" id="tags" onclick="drawPlot()"></input>Tag<span class="legend" style="color:#D94436">&#8226;</span></div>
+
+<div><input type="checkbox" id="searches" onclick="drawPlot()"></input>Search<span class="legend" style="color:#458C6B">&#8226;</span></div>
+
+<div><input type="checkbox" id="conversations" onclick="drawPlot()"></input>Conversation<span class="legend" style="color:#D9A86C">&#8226;</span></div>
+
+<div><input type="checkbox" id="likes" onclick="drawPlot()"></input>Like<span class="legend" style="color:#7A3B7F">&#8226;</span></div>
+
+<div><input type="checkbox" id="feedback" onclick="drawPlot()"></input>Feedback<span class="legend" style="color:grey">&#8226;</span></div>
+
+</form>
+</div>
+<style>
+.legend {
+	font-size:37px;
+}
+
+div div{
+    display: block;
+    padding:4px 2px;
+}
+</style>
+
+
+<script>
+$('#tags').prop('checked', true);
+drawPlot();
+</script>
+
+
+</html>

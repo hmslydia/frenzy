@@ -1,0 +1,80 @@
+<html>
+<head>
+<script src="http://code.jquery.com/jquery-latest.min.js"
+        type="text/javascript"></script>
+<script src="../saved/dataJonathanCaitlinDepsteinPilotNature.js"></script>
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<script src="visualization-utils.js"></script>
+</head>
+
+<body>
+<div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+</body>
+
+
+<script>
+/* Plots individual user's tags over time */
+
+var users = ["caitbon", "jb", "Awesomesauce99"]
+var colors = ["#458C6B", "#D94436", "#D9A86C"]
+
+
+
+var series = getSeries(studyData, users, colors, extractTimes);
+
+
+$(function () {
+        $('#container').highcharts({
+            chart: {
+                type: 'scatter'
+            },
+		    tooltip: {
+		        enabled: false
+		    },
+            title: {
+                text: 'Tags made by participants over time'
+            },
+            subtitle: {
+                text: 'Each dot indicates one tag'
+            },
+            xAxis: {
+                type: 'datetime',
+				title: { text: 'Minutes elapsed'},
+		        dateTimeLabelFormats: {
+		            second: '%M',
+					minute: '%M',
+					hour: ' ',
+					day: ' ',
+					week: ' ',
+					month: ' ',
+					year: ' '
+		        }
+            },
+            yAxis: {
+                title: {
+                    text: ''
+                },
+				labels: {
+				    formatter: function() {
+				        return users[this.value - 1];
+				    }
+				},
+        		tickInterval: 1,
+				min:0,
+				max:4,
+				showFirstLabel:false,
+				showLastLabel:false
+            },
+            tooltip: {
+                formatter: function() {
+                        return '<b>'+ this.series.name +'</b><br/>'+
+                        Highcharts.dateFormat('%e. %b', this.x) +': '+ this.y +' m';
+                }
+            },
+            
+            series: series
+        });
+    });
+    
+</script>
+</html>

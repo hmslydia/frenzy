@@ -1,4 +1,4 @@
-{
+studyData = {
   "tweets": {
     "nature0": {
       "time": 0,
