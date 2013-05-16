@@ -1,4 +1,5 @@
 
+
 //start server
 var express = require('express');
 var fs = require('fs');
@@ -13,7 +14,6 @@ var allData = {
 "streams":{},
 "users":{},
 "likes":[],
-"hashtags":[],
 "requiredHashtags": [], 
 "conversation":[], 
 "currentLocations":[], 
@@ -22,7 +22,7 @@ var allData = {
     "events":[]
     }
 }
-var answer=[]
+
 var numberOfTweetsToDisplayIncrementSize = 2
 
 /*
@@ -151,6 +151,7 @@ function initializeAllData(){
     instantiateUsers()
     instantiateRequiredHashtags()
     instantiateConversation()
+    instantiateHashtags()
 
     //instantiateCompletionCondition()
 	
@@ -229,6 +230,10 @@ function instantiateTweets(){
     allData["tweets"] = tweets
 }
 
+function instantiateHashtags() {
+	allData["hashTags"] = [];
+}
+
 function instantiateStreams(){
 
 	allData["streams"] = {
@@ -299,7 +304,8 @@ saveTweet
 updateTweet
 createNewTweet
 
-
+//hashtag shit
+savetags
 
 //SEARCH
 searchTweets
@@ -341,51 +347,6 @@ app.post('/home.html', function(request, response){
     	}
     
     	response.send(JSON.stringify({ "baseTweetIds" : baseTweetIds,"tweets":allData["tweets"],"lastRefreshTime":request.session.lastRefresh}));
-    }else if (command == "renameHashtag"){
-    	var oldHashtag = args['oldHashtag'];
-    	var newHashtag = args['newHashtag'];
-    	
-    	replaceAllHashtags(oldHashtag,newHashtag);
-    	var username= args["username"]
-        var allBaseTweetAndDiscussionObjects = getAllBaseTweetAndDiscussionObjects()
-        
-        var allBaseTweetAndDiscussionObjectsSORTED_ids = sortBaseTweetAndDiscussionObjects(allBaseTweetAndDiscussionObjects, "time")
-        var allBaseTweetAndDiscussionObjectsSORTED = getBaseTweetAndDiscussionObjects(allBaseTweetAndDiscussionObjectsSORTED_ids); 
-    	
-    	var newTweets=getNewTweetCount(username,request.session.lastRefresh,utils.dictToArray(allData["tweets"]));
-		var count=newTweets["count"];
-		var creators=newTweets["newTweetCreators"]
-		
-		var newLikeIds=getNewLikes(username,request.session.lastRefresh,utils.dictToArray(allData["tweets"]));
-		
-		var currentTime = getTime()
-		request.session.lastRefresh = currentTime;
-		
-    	response.send(JSON.stringify({"twitterFeed" : allBaseTweetAndDiscussionObjectsSORTED, "hashtagSummary": getHashtagSummary(),"newTweetCreators":creators,"newLikeIds":newLikeIds,"requiredHashtags":allData["requiredHashtags"],"likes":allData["likes"], "lastRefreshTime": currentTime}))
-    	
-    }else if(command == "moveToHashtag"){
-    console.log("MOVING");
-    	var newChildHashtag = args['newChildHashtag'];
-    	var parentHashtag = args['parentHashtag'];	
-    
-    	moveTo(newChildHashtag, parentHashtag);
-    	
-    	var username= args["username"]
-        var allBaseTweetAndDiscussionObjects = getAllBaseTweetAndDiscussionObjects()
-        
-        var allBaseTweetAndDiscussionObjectsSORTED_ids = sortBaseTweetAndDiscussionObjects(allBaseTweetAndDiscussionObjects, "time")
-        var allBaseTweetAndDiscussionObjectsSORTED = getBaseTweetAndDiscussionObjects(allBaseTweetAndDiscussionObjectsSORTED_ids); 
-    	
-    	var newTweets=getNewTweetCount(username,request.session.lastRefresh,utils.dictToArray(allData["tweets"]));
-		var count=newTweets["count"];
-		var creators=newTweets["newTweetCreators"]
-		
-		var newLikeIds=getNewLikes(username,request.session.lastRefresh,utils.dictToArray(allData["tweets"]));
-		
-		var currentTime = getTime()
-		request.session.lastRefresh = currentTime;
-		
-    	response.send(JSON.stringify({"twitterFeed" : allBaseTweetAndDiscussionObjectsSORTED, "hashtagSummary": 		getHashtagSummary(),"newTweetCreators":creators,"newLikeIds":newLikeIds,"requiredHashtags":allData["requiredHashtags"],"likes":allData["likes"], "lastRefreshTime": currentTime}))
     }else if (command == "saveTweet"){    
     	//{"parentTweetId" : parentTweetId, "replyText":replyText,"username":username}      	
 	    parentTweetId=args["parentTweetId"]
@@ -406,8 +367,34 @@ app.post('/home.html', function(request, response){
         
 	    response.send(JSON.stringify({ "discussionFeed" : returnDiscussionObjects, "hashtagSummary": getHashtagSummary(),"likes":allData["likes"]}));	    
   
-    }
-    else if (command == "updateTweet"){
+    } else if (command == "saveTags"){    
+    	//{"parentTweetId" : parentTweetId, "replyText":tag,"username":username}      	
+	    var tag = args["replyText"];
+  		var parentTweetId = args["parentTweetId"];
+  		var baseTweetId = getBaseTweet(parentTweetId);
+  		var username = args["username"];
+  		var newTagObject = createNewTagsObject(parentTweetId, tag, username);
+  		newId = newTagObject["id"];
+  		console.log("lolololol" + newId)
+  		if(!allData["hashTags"][newId]) {
+  			allData["hashTags"].push({newId: []});
+  		}
+  		allData["hashTags"][newId].push(newTagObject);
+  			var time = newTagObject["time"];
+  		var result = findTagsWithParent(newId, time);
+  		response.send(JSON.stringify({"updatedTags" : result}));
+    } else if (command == "getTags") {
+    	var result = [];
+    	//console.log("length of hashTags:" + allData["hashTags"].length);
+    	for(id in allData["hashTags"]) {//for(var i = 0; i < allData["hashTags"].length; i++) {
+    		console.log("id: " + id[0]+id[1]);
+    		for(tagobject in id) {
+    			console.log(tagobject["html"]);
+    			result.push(tagobject["html"]);
+    		}
+       	}
+       	response.send(JSON.stringify({"allTags" : result}));
+    } else if (command == "updateTweet"){
         var tweetId = args["tweetId"]
         var newContent = args["newContent"]
         var username = args["username"]
@@ -644,7 +631,6 @@ function logFeedback(username, uiElt, notes){
 function logTweetEdit(username, oldContent, newContent){
     var eventObj = {"username": username, "time": getTime(), "oldContent":oldContent, "newContent":newContent, "event": "editTweet"}
     allData["history"]["events"].push(eventObj)    
-
     //console.log(allData["history"]["events"])	
 }
 
@@ -708,6 +694,16 @@ function getQueryResultIds(searchQuery, allTweets){
         var termsToHighlight = [searchQuery]
         return {"matchingTweetIds": findMatchingTweetIds(searchQuery, allTweets), "searchTermArray": termsToHighlight}
     }
+}
+
+function findTagsWithParent(id, time) {
+	var results = [];
+	for(var i = 0; i < allData["hashTags"][id].length; i++) {
+		if (allData["hashTags"][id][i]["time"] >= time) {
+			results.push(allData["hashTags"][id][i]["html"]);
+		}
+	}
+	return results;
 }
 
 function findMatchingTweetIds(searchQuery, allTweets){
@@ -938,127 +934,25 @@ function getRequiredHashtagValues(baseTweetId){
 
 }
 
-
-
-
-
-
-
-
-
-function orderAndEnchild(hashtagArray, allHTags){
-    //console.log("hashtagArray")
-    //console.log(hashtagArray)
-    var sortedHashtagArray = hashtagArray.sort(function(a,b){return b["hashtag"]["memberTweetIds"].length - a["hashtag"]["memberTweetIds"].length});
-    
-    var queue = []
-    for( i in sortedHashtagArray ){
-        var hashtagObj = sortedHashtagArray[i]
-        queue.push(hashtagObj)
-        //console.log("hashtagObj")
-        //console.log(hashtagObj["hashtag"])
-    }
-    
-    while( queue.length > 0 ){
-        var largestHashtag = queue[0]
-        var largestHashtagId = largestHashtag["hashtag"]["hashtag"]
-        answer.push(largestHashtag)
-        //remove largestHashtag from the array
-        var index = queue.indexOf(largestHashtag);
-        var eltToSplice = queue.splice(index, 1)
-        
-        var lookForChildrenHashtags = []
-        
-        for( i in sortedHashtagArray){
-            var elt = sortedHashtagArray[i]
-            if (elt != largestHashtag){
-                lookForChildrenHashtags.push(elt)
-            }
-        }
-        
-        //find all the children of this hashtag
-        var childrenOflargestHashtag = utils.filterArray(lookForChildrenHashtags, function(x){return isChildOfArray(largestHashtag["hashtag"]["memberTweetIds"], x["hashtag"]["memberTweetIds"])})
-        //remove them from the queue
-        for( i in childrenOflargestHashtag){
-            var elt = childrenOflargestHashtag[i]
-            //remove elts from queue
-            var index = queue.indexOf(elt);
-            if(index > -1){
-                var eltToSplice2 = queue.splice(index, 1);
-                //Note: we only want to remove it from the queue if it isn't already been removed (this happens when you have 
-                //a hashtag that is the child of two parents.  The first time it gets enchilded, it is removed, the second time
-                //it is enchilded, you can't remove it (it isn't in the queue anymore)
-            }
-        }
-        //operate on all children
-        //CHANGE THEIR PARENTAGE - I NEED COPIES
-        //add parents to the children AND recurse into them
-        
-        var parentsParents = largestHashtag["parents"]
-        var parentsForNewElts = []
-        for( i in parentsParents){
-            var parentParent = parentsParents[i]
-            parentsForNewElts.push(parentParent)
-        }
-        parentsForNewElts.push(largestHashtagId)
-        
-        copiesOfChildrenOflargestHashtag = []
-        for( i in childrenOflargestHashtag){
-            child = clone(childrenOflargestHashtag[i])
-            child["parents"] = parentsForNewElts
-            copiesOfChildrenOflargestHashtag.push(child)
-        }
-        
-        orderAndEnchild(copiesOfChildrenOflargestHashtag, allHTags)
-    }
-
-}
-
-function isChildOfArray(arr1, arr2){    
-    rtn = true
-    //all the elts of arr2 are in arr1
-    for(i in arr2){
-        elt2 = arr2[i]
-        if (arr1.indexOf(elt2) == -1){
-            rtn = false
-        }
-    }
-    
-    return rtn
-}
-
-function clone(obj) {
-    if (null == obj || "object" != typeof obj) return obj;
-    var copy = obj.constructor();
-    for (var attr in obj) {
-        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
-    }
-    return copy;
-}
-
-
-
-
-
 function getHashtagSummary(){
-	var hashtagSummary = getHashtagCounts()
-	answer=[]
-	var allHashtags = []
-	for( i in hashtagSummary){
-        var hashtagObject = hashtagSummary[i]
-        allHashtags.push({"hashtag":hashtagObject, "parents":[]} )
-    }
-     
-    orderAndEnchild(allHashtags, allHashtags);
-    console.log(answer)
-   // return allData["hashtags"];
-   return answer;
-}
-
-function getHashtagCounts(){
 	
     hashtagCounts = {}
-
+    /*
+    allData["tweets"]["hmslydia0"] = {
+        "time": 8, 
+        "html": "asdf  #bar #foo #foo #foo #foo",
+        "id": "hmslydia0", 
+        "parent": "uist0", 
+        "creator": "hmslydia"        
+    }
+    allData["tweets"]["hmslydia1"] = {
+        "time": 8, 
+        "html": "asdf #foo #baz",
+        "id": "hmslydia1", 
+        "parent": "uist1", 
+        "creator": "hmslydia"        
+    }    
+    */
     for( t in allData["tweets"]){
         var tweetText = allData["tweets"][t]["html"]
         var baseTweet = getBaseTweet(t)
@@ -1089,42 +983,6 @@ function getHashtagCounts(){
     
 }
 
-function moveTo(newChildHashtag, parentHashtag){
-	
-	for (t in allData["tweets"]){
-		var tweetText = allData["tweets"][t]["html"]
-		if(tweetText.indexOf(newChildHashtag)>-1){
-			console.log("IN IF");
-			if(tweetText.indexOf(parentHashtag)==-1){
-				var re = new RegExp(newChildHashtag,"gi");
-				var newTweetText = tweetText.replace(re,newChildHashtag+" "+parentHashtag);
-				allData["tweets"][t]["html"] = newTweetText;
-				console.log(newTweetText)
-			}
-		}
-	}
-	
-}
-
-
-function replaceAllHashtags(oldHashtag,newHashtag){
-	for (t in allData["tweets"]){
-		var tweetText = allData["tweets"][t]["html"]
-		if(tweetText.indexOf(oldHashtag)>-1){
-			console.log(tweetText)
-			var re = new RegExp(oldHashtag,"gi");
-			var newTweetText = tweetText.replace(re,newHashtag);
-			allData["tweets"][t]["html"] = newTweetText;
-			console.log(newTweetText)
-			/*
-			var str="Mr Blue has a blue house and a blue car";
-			var blue = "blue"
-			var re = new RegExp(blue,"gi");
-			var n=str.replace(re, "red");
-			console.log(n);*/
-		}
-	}
-}
 function containsHashtag(biggerHashtag, smallerHashtag){
     var biggerHashtagElements = biggerHashtag["memberTweetIds"]
     var smallerHashtagElements = smallerHashtag["memberTweetIds"]
@@ -1199,6 +1057,19 @@ function createNewTweetObject(parentTweetId,replyText,username){
     
     return tweetObject;
 }
+
+function createNewTagsObject(parentTweetId, tag, username) {
+	var time=getTime();
+	var newId = getNewTweetId(username)
+	var tagObject = {
+		"time":time,
+		"html":tag,
+		"id":newId,
+		"parent":parentTweetId
+	}
+	return tagObject;
+}
+
 function createNewLikesObject(tweetId,username,time){
 		/*
 	"{
@@ -1571,15 +1442,4 @@ function restoreData(timestamp){
 			}
 		});
 }
-
-//////////////////////////////////////////
-//// start serving
-//////////////////////////////////////////
-
-app.listen(3000);
-console.log('Listening on port 3000');
-//restoreData(1)
-
-
-
 
