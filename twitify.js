@@ -1,4 +1,5 @@
 
+
 //start server
 var express = require('express');
 var fs = require('fs');
@@ -24,6 +25,9 @@ var allData = {
 }
 var answer=[]
 var numberOfTweetsToDisplayIncrementSize = 2
+
+var hashtagData = []; 
+
 
 /*
 allData["tweets"] = {
@@ -141,6 +145,11 @@ app.get("/hashtagSummary.js", function(require, response) {
 require('./editTweets');
 app.get("/editTweets.js", function(require, response) {
     response.sendfile("editTweets.js")
+})
+
+require('./hashtagsForBaseTweets');
+app.get("/hashtagsForBaseTweets.js", function(require, response) {
+    response.sendfile("hashtagsForBaseTweets.js")
 })
 
 initializeAllData();

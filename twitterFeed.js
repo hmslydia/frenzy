@@ -112,8 +112,8 @@ function displayFeed(twitterFeed,likes){
 	for(var i = 0; i < twitterFeed.length; i++) {
         tweetObj = twitterFeed[i]["basetweet"]  
         discussionObj = twitterFeed[i]["discussion"]  
-        
-        tweetAndDiscussionDiv = createTweetAndDiscussionDiv(tweetObj, discussionObj,likes)
+        hashtagData = []; //TODO twitterFeed[i]["hashtagData"] 
+        tweetAndDiscussionDiv = createTweetAndDiscussionDiv(tweetObj, discussionObj,likes, hashtagData)
 		$("#twitterFeed").append(tweetAndDiscussionDiv);
 			
 	}
@@ -199,13 +199,25 @@ function getRequiredHashtagValues(baseTweetIds){
 
 
 
-function createTweetAndDiscussionDiv(tweetObj, discussionObj,likes){
+function createTweetAndDiscussionDiv(tweetObj, discussionObj,likes, hashtagData){
+	//Each item in the feed is a tweetAndAnnotationsDiv.
+	//it contains one BaseTweet, e.g. a photo
+	//and a DIV that contains the annotations for that "tweet"
+	//the annotations include: 
+	//		1. a group of selectable hashtags
+	//		2. a discussion
 
-    var tweetAndDiscussionDiv = $("<div class='row'>")
-    
+    var tweetAndAnnotationsDiv = $("<div class='row'>")
     var baseTweetDiv = createTweetDiv(tweetObj)
-    
-    var discussionDiv = $("<div class='span5 discussionFeed' style='background:white' id='discussion-"+tweetObj["id"]+"'>")    
+    var annotationDiv = $("<div class='span5 annotations' style='background:white' id='annotation-"+tweetObj["id"]+"'>")
+    var discussionDiv = $("<div class='discussionFeed' style='background:white' id='discussion-"+tweetObj["id"]+"'>")    
+    var selectableHashtagDiv = $("<div class='selectableHashtagsDiv' style='background:white' id='selectableHashtagsDiv-"+tweetObj["id"]+"'>") 
+
+    tweetAndAnnotationsDiv.append(baseTweetDiv)
+    tweetAndAnnotationsDiv.append(annotationDiv)
+    annotationDiv.append(selectableHashtagDiv)
+    annotationDiv.append(discussionDiv)
+
 
     var discussionDivContent = createDiscussionDivContent(discussionObj,likes)
 
@@ -219,20 +231,28 @@ function createTweetAndDiscussionDiv(tweetObj, discussionObj,likes){
     discussionDiv.append(row);
     discussionDiv.append(discussionDivContent)
 
-    
+    //create a blank "post" at the end of every thread of discussion
     baseTweetId = tweetObj["id"]
     var baseReplyDiv = createBaseReplyDiv(baseTweetId)
-    var hashTags = $("<div class='span2 hash'>");
-    var input = $("<input type='text' class='hashInput' id='input-" + baseTweetId + "'>");
-    var button = $("<button>");
-    button.text("post");
-    var paragraph = $("<p>");
-    paragraph.text("Enter in a hashtag:");
-    hashTags.append(paragraph);
-    hashTags.append(input);
-    hashTags.append(button);
-	row.append(hashTags);
     row.append(baseReplyDiv);
+
+    //create a blank input for adding more hashtags
+    var selectableHashtags = $("<div class='span2 selectableHashtags'>");
+    var inputNewHashtag = $("<input type='text' class='inputNewHashtag' id='inputNewHashtag-" + baseTweetId + "'>");
+    
+   
+    $(inputNewHashtag).autocomplete({
+            source: hashtagData
+    }); 
+    var submitNewHashtagButton = $("<button>");
+    submitNewHashtagButton.text("add");
+    var enterNewHashtagsLabel = $("<p>");
+    enterNewHashtagsLabel.text("Enter in a hashtag:");
+    selectableHashtags.append(enterNewHashtagsLabel);
+    selectableHashtags.append(inputNewHashtag);
+    selectableHashtags.append(submitNewHashtagButton);
+	selectableHashtagDiv.append(selectableHashtags);
+    
 
     wrap2 = function(d,divCopy, twtId){
 	        d.click(function(){
@@ -240,16 +260,17 @@ function createTweetAndDiscussionDiv(tweetObj, discussionObj,likes){
 	        replyText=divCopy.val();
 		    saveTags(replyText,twtId)  
 		    divCopy.val("");
-		     var bigdiv = $("discussion-" + twtId);
-		    var placeholderDiv = bigdiv.find(".postPlaceholder");
-		    toggleReplyDiv(placeholderDiv,twtId)
+		    //TODO: update selectable hashtags for this tweet
+
+		    //var bigdiv = $("discussion-" + twtId);
+		    //var placeholderDiv = bigdiv.find(".postPlaceholder");
+		    //toggleReplyDiv(placeholderDiv,twtId)
 	        })
 	}
-	wrap2(button, input, baseTweetId);
+	wrap2(submitNewHashtagButton, inputNewHashtag, baseTweetId);
         
-    tweetAndDiscussionDiv.append(baseTweetDiv)
-    tweetAndDiscussionDiv.append(discussionDiv)
-    return tweetAndDiscussionDiv
+
+    return tweetAndAnnotationsDiv
 }
 
 function createTweetDiv(tweetObj){
@@ -373,8 +394,7 @@ function createDiscussionDivContent(discussionObj,likes){
 }
 
 function populatePastTags(div, id) {
-	var array = ["#lol", "#omnom", "#cats", "#dogs", "#mice"];
-	for(var i = 0; i < array.length; i++) {
+	for(var i = 0; i < hashtagData.length; i++) {
 		var item = $("<input type='checkbox' checked='checked'>");
 		var words = $("<span>");
 		words.text(array[i]);

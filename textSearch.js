@@ -1,9 +1,8 @@
+
 function textSearchSetup(){
     $("#search").keypress(function(event) {
         if( event.which == 13 ) {
             searchHelper()
-       } else if (event.keyCode == 35) {
-          searchHashTags();
        }
     })
 
@@ -20,12 +19,7 @@ function textSearchSetup(){
     
 }
 
-function searchHashTags() {
-    ajax("getTags", {}, function(returnData) { 
-        data = JSON.parse(returnData);
-        console.log(data["allTags"]);
-    });
-}
+
 
 function escapeRegExp(str) {
   return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
